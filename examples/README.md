@@ -12,6 +12,6 @@ Worked, runnable examples. Each is self-contained.
 Run any of them:
 
 ```bash
-pip install -e ".[all,dev]"
+pip install -e ".[all,dev]"   # from a clone of the repo
 python examples/01_check_a_brief.py ../tests/fixtures/sample_brief.md
 ```

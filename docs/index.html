@@ -543,16 +543,33 @@ report  ./audit/report.md</pre>
       <div class="two" style="margin-top:30px">
         <div>
           <h3>Install and run</h3>
-          <pre class="code">pip install "verascite[all]"
+          <pre class="code"><span class="tc"># 1. Python 3.10+ required — check yours</span>
+python3 --version
 
-<span class="tc"># optional — adds recent-decision coverage</span>
-export COURTLISTENER_API_TOKEN="..."
+<span class="tc"># 2. Install into an isolated environment</span>
+python3 -m venv verascite-env
+source verascite-env/bin/activate
+pip install "verascite[all] @ \
+  git+https://github.com/rakib-nyc/verascite.git"
 
+<span class="tc"># 3. Confirm</span>
+verascite --help
+
+<span class="tc"># 4. Run it</span>
 verascite brief.pdf --out ./audit</pre>
           <p style="margin-top:14px;font-size:.93rem;color:var(--muted)">
-            Works with no credentials at all against the public-domain archive. Exit code is
-            <code>2</code> when anything is flagged, so it drops into CI unchanged. The token
-            never reaches reports, ledgers, cache keys, or logs — enforced by test.
+            Accepts <code>.pdf</code>, <code>.docx</code>, <code>.md</code> and
+            <code>.txt</code>. Writes <code>audit/report.md</code> (the evidence package)
+            and <code>audit/ledger.json</code>. Exit code is <code>2</code> when anything is
+            flagged, so it drops into CI unchanged.
+          </p>
+          <p style="font-size:.93rem;color:var(--muted)">
+            <b>No credentials needed.</b> It runs against the public-domain archive out of
+            the box. A free <a href="https://www.courtlistener.com/profile/api/">CourtListener
+            token</a> in <code>COURTLISTENER_API_TOKEN</code> widens coverage of recent
+            decisions; it never reaches reports, ledgers, cache keys, or logs — enforced by
+            test. <a href="https://github.com/rakib-nyc/verascite/blob/main/docs/INSTALL.md">Full
+            install guide, including Windows →</a>
           </p>
 
           <h3 style="margin-top:32px">In Python</h3>

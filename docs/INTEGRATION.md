@@ -32,9 +32,11 @@ citation. **This is the single most damaging way to misuse this tool.**
 ## 2. Install and invoke
 
 ```bash
-pip install "verascite[all]"
+pip install "verascite[all] @ git+https://github.com/rakib-nyc/verascite.git"
 export COURTLISTENER_API_TOKEN="..."   # optional; adds recent-decision coverage
 ```
+
+Full instructions, including Windows: [`INSTALL.md`](INSTALL.md).
 
 ### Python
 

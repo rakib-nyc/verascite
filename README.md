@@ -127,44 +127,120 @@ instead of scanned OCR — not a cleverer checker. Full protocols in
 
 ---
 
-## Install
+## Getting started
+
+### Step 1 — Check you have Python 3.10 or newer
 
 ```bash
-pip install verascite            # core
-pip install "verascite[all]"     # + PDF and DOCX input
+python3 --version
 ```
 
-From source:
+If that prints anything below `3.10`, install a newer Python from
+[python.org/downloads](https://www.python.org/downloads/) first.
+
+### Step 2 — Install VeraScite
 
 ```bash
-git clone https://github.com/rakib-nyc/verascite.git
-cd verascite
-pip install -e ".[dev]"
-pytest -q                        # 295 tests, no network, no API key needed
+pip install "verascite[all] @ git+https://github.com/rakib-nyc/verascite.git"
 ```
 
-### Optional: a CourtListener API token
-
-VeraScite works with no credentials against the Caselaw Access Project. A free
-[CourtListener](https://www.courtlistener.com/help/api/) token adds coverage of recent
-decisions:
+<details>
+<summary>Recommended: install into a virtual environment (keeps it isolated)</summary>
 
 ```bash
-export COURTLISTENER_API_TOKEN="your-token"
+python3 -m venv verascite-env
+source verascite-env/bin/activate        # Windows: verascite-env\Scripts\activate
+pip install "verascite[all] @ git+https://github.com/rakib-nyc/verascite.git"
 ```
 
-The token is never written to reports, ledgers, cache keys, or logs — this is enforced by
-tests (`tests/test_no_credential_leak.py`).
+Re-run the `activate` line in any new terminal before using `verascite`.
+</details>
 
----
+The `[all]` extra adds PDF and DOCX support. For Markdown and plain text only,
+drop it and install `git+https://github.com/rakib-nyc/verascite.git`.
 
-## Quick start
+### Step 3 — Confirm it installed
+
+```bash
+verascite --help
+```
+
+You should see the usage message. If the shell says `command not found`, see
+[Troubleshooting](docs/INSTALL.md#troubleshooting).
+
+### Step 4 — Run it on a document
 
 ```bash
 verascite brief.pdf --out ./audit
 ```
 
-Produces `./audit/report.md` (the evidence package) and `./audit/ledger.json` (machine-readable).
+Accepts `.pdf`, `.docx`, `.md`, and `.txt`. Two files are written:
+
+| File | What it is |
+|---|---|
+| `audit/report.md` | The evidence package — open this |
+| `audit/ledger.json` | Machine-readable results for scripting |
+
+The exit code is `2` if anything was contradicted by a retrieved source, `0`
+otherwise — so it drops into a pre-commit hook or CI job unchanged.
+
+### Step 5 (optional) — Add a CourtListener token for wider coverage
+
+VeraScite works with **no credentials at all** against the public-domain
+Caselaw Access Project. A free [CourtListener](https://www.courtlistener.com/)
+token adds coverage of recent decisions:
+
+1. Create a free account at [courtlistener.com/sign-in](https://www.courtlistener.com/sign-in/)
+2. Copy your token from [courtlistener.com/profile/api](https://www.courtlistener.com/profile/api/)
+3. Put it in your environment:
+
+```bash
+export COURTLISTENER_API_TOKEN="your-token-here"
+```
+
+To persist it, add that line to `~/.zshrc` or `~/.bashrc`.
+
+The token is never written to reports, ledgers, cache keys, or logs — enforced
+by `tests/test_no_credential_leak.py`.
+
+> **On PyPI:** once published, this becomes `pip install "verascite[all]"`.
+> Until then the Git URL above is the install path, and it works today.
+
+Full instructions, including Windows and offline installation:
+**[`docs/INSTALL.md`](docs/INSTALL.md)**
+
+---
+
+## Try it in 30 seconds
+
+Save this as `demo.md`:
+
+```markdown
+Plaintiff's complaint fails to state a claim. A pleading must contain more than
+"labels and conclusions." Bell Atlantic Corp. v. Twombly, 550 U.S. 544, 555 (2007).
+
+The court should also consider Smith v. Fictional Reporter Co., 88 Jurisprudentia
+100 (9th Cir. 2018), which is directly on point.
+
+See also Tinch v. Video Indus. Servs., Inc., 2019 WL 1396975 (E.D. Mich. 2019).
+```
+
+Then run:
+
+```bash
+verascite demo.md --out ./audit --offline
+```
+
+`--offline` keeps every citation string on your machine. You will see the
+distinction the tool exists to make:
+
+- **`Jurisprudentia`** is `FLAGGED` — no such reporter has ever been published.
+- **`2019 WL 1396975`** is `UNVERIFIED` — a real decision with a vendor-only
+  identifier. **Not** reported as fabricated.
+
+---
+
+## Other ways to run it
 
 ```bash
 # Local checks only. No citation string leaves the machine.
@@ -176,9 +252,6 @@ verascite brief.md --out ./audit --no-quotes
 # Resume an interrupted run from the existing ledger
 verascite brief.pdf --out ./audit --resume
 ```
-
-Exit code is `2` when anything is `FLAGGED`, `0` otherwise — so it drops into a
-pre-commit hook or CI job unchanged.
 
 ### Python API
 
@@ -374,6 +447,7 @@ with the measurements that produced them.
 
 | Document | Contents |
 |---|---|
+| [`docs/INSTALL.md`](docs/INSTALL.md) | Full installation guide, Windows, troubleshooting |
 | [`docs/INTEGRATION.md`](docs/INTEGRATION.md) | Full agent / pipeline integration guide |
 | [`docs/OUTPUT.md`](docs/OUTPUT.md) | Verdict vocabulary and ledger schema |
 | [`evals/`](evals/) | Benchmark protocols, results, and rejected approaches |
