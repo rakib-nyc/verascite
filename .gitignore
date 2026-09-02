@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.env
+.pytest_cache/
+.hypothesis/
+.DS_Store
+.verascite-cache/
+audit/
+audit-*/
+evals/**/eval.jsonl
+evals/**/*.jsonl

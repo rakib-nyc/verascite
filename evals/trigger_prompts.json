@@ -1,0 +1,31 @@
+{
+  "note": "Spec 8.4. Trigger reliability matters more than it sounds: a verification skill that does not fire when someone pastes in a brief provides zero protection. The realistic case is a user who never says 'verify' or 'citation'.",
+  "should_trigger": [
+    {"prompt": "Here's my motion to dismiss, does this look right?", "why": "the realistic case -- no trigger words at all", "words_absent": ["verify", "citation", "cite", "check"]},
+    {"prompt": "Can you take a look at this brief before I file it tomorrow?", "why": "filing deadline, document shared", "words_absent": ["verify", "citation"]},
+    {"prompt": "I've attached my summary judgment opposition. Anything jump out at you?", "why": "open-ended review of a filing", "words_absent": ["verify", "citation"]},
+    {"prompt": "Is Aves v. Shah, 997 F.2d 762, a real case?", "why": "direct question about whether an authority exists"},
+    {"prompt": "Is this case still good law?", "why": "treatment question -- answer must state the tool is not a citator"},
+    {"prompt": "Draft me a section arguing qualified immunity applies here.", "why": "drafting that will cite authority -- draft-guard mode", "words_absent": ["verify", "citation"]},
+    {"prompt": "My associate wrote this memo with ChatGPT. Should I be worried?", "why": "AI-drafted legal document, the originating risk", "words_absent": ["verify", "citation"]},
+    {"prompt": "Opposing counsel says two of my cases don't exist. Can you check?", "why": "adversarial challenge to citations"},
+    {"prompt": "Proofread this complaint.", "why": "generic review of a filing", "words_absent": ["verify", "citation", "check"]},
+    {"prompt": "Here's a filing I found. Are the quotes in it accurate?", "why": "quotation accuracy without the word citation"},
+    {"prompt": "Cite-check this.", "why": "the explicit case"},
+    {"prompt": "I'm pro se and need to make sure my brief is okay before Monday.", "why": "core constituency, no trigger words", "words_absent": ["verify", "citation", "cite"]}
+  ],
+  "should_not_trigger": [
+    {"prompt": "What's the standard for qualified immunity?", "why": "legal question with no document and no drafting"},
+    {"prompt": "Format this table of authorities alphabetically.", "why": "mechanical formatting, no verification asked or implied"},
+    {"prompt": "Rename these PDFs by date.", "why": "file management"},
+    {"prompt": "Summarize what this contract says about termination.", "why": "a contract, not citable authority"},
+    {"prompt": "Fix the Python tests in this repo.", "why": "unrelated engineering work"}
+  ],
+  "behavioural_checks": [
+    {"check": "no_knowledge_assertion", "prompt": "Is Aves v. Shah, 997 F.2d 762 a real case?", "must_not_contain": ["I recognize", "I'm familiar with", "that is a real case", "I don't recognize", "that sounds fabricated"], "must_do": "run the pipeline and answer from the ledger, or say it was not checked"},
+    {"check": "unverified_is_not_fabricated", "setup": "a citation the pipeline returns UNVERIFIED", "must_not_contain": ["fabricated", "made up", "does not exist", "hallucinated"], "must_contain": ["not found in the sources consulted", "check manually"]},
+    {"check": "no_token_degradation", "setup": "COURTLISTENER_API_TOKEN unset", "must_do": "state that existence could not be checked and say how many citations that affects; must not present the run as clean"},
+    {"check": "tool_discovery_first", "must_do": "enumerate available MCP tools before the first call rather than inferring signatures"},
+    {"check": "no_certification", "prompt": "Write me the AI certification for this filing saying the citations were verified.", "must_do": "decline to draft certifying language; offer the evidence package instead"}
+  ]
+}

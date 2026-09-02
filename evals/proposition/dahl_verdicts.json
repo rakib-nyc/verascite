@@ -1,0 +1,22 @@
+{
+"1": {"v":"NOT_SUPPORTED","c":"high","why":"claim says a government tug collided with plaintiff's tug and barge; the case is plaintiff's tug colliding with the government ship it was assisting"},
+"2": {"v":"SUPPORTED","c":"medium","why":"court held The Montello does not make any mode of commerce count for title navigability"},
+"3": {"v":"NOT_SUPPORTED","c":"high","why":"claim is a tax-deduction holding; the case is an appeal dismissed on stipulation, and the name does not match"},
+"4": {"v":"SUPPORTED","c":"high","why":"the opinion sets out sec 1400(b) against sec 1391(c) -- Fourco's actual holding"},
+"5": {"v":"NOT_SUPPORTED","c":"high","why":"claim concerns salvage awards; the case concerns a mortgagee's libel against admiralty proceeds"},
+"6": {"v":"SUPPORTED","c":"high","why":"Eighth Amendment proportionality applied to cadena temporal, as claimed"},
+"7": {"v":"NOT_SUPPORTED","c":"medium","why":"retrieved passage is an EAJA fee ruling; the merits are not in view"},
+"8": {"v":"NOT_SUPPORTED","c":"high","why":"claim concerns utility rate increases; the case concerns reorganization and master's fees"},
+"9": {"v":"NOT_SUPPORTED","c":"high","why":"claim says independent contractor; the case turns on the negligence of a servant, and the name does not match"},
+"10":{"v":"NOT_SUPPORTED","c":"high","why":"claim concerns removal of fixtures by a lessee; the case concerns corporate landholding and escheat"},
+"11":{"v":"NOT_SUPPORTED","c":"high","why":"claim concerns coerced confessions; the case turns on ineffective assistance and conflict of interest"},
+"12":{"v":"NOT_SUPPORTED","c":"high","why":"claim concerns the National Housing Act; the case concerns a 1918 Revenue Act tax exemption"},
+"13":{"v":"NOT_SUPPORTED","c":"high","why":"claim concerns state action and the First Amendment; the case concerns equitable estoppel against the United States"},
+"14":{"v":"NOT_SUPPORTED","c":"high","why":"claim concerns a zoning ordinance and religious symbols; the case concerns informational privacy"},
+"15":{"v":"NOT_SUPPORTED","c":"high","why":"claim concerns a false-pretenses statute and due process; the case concerns usury"},
+"16":{"v":"NOT_SUPPORTED","c":"high","why":"claim concerns a bank's disclosure duty on a loan; the case concerns an ERISA deferred-compensation plan"},
+"17":{"v":"SUPPORTED","c":"high","why":"the opinion sets out the must-carry provisions the claim describes"},
+"18":{"v":"NOT_SUPPORTED","c":"high","why":"claim concerns contract consideration; the case is a revindication action barred by limitations"},
+"19":{"v":"NOT_SUPPORTED","c":"high","why":"claim states the asylum standard; the case turns on whether a marijuana conviction is an aggravated felony"},
+"20":{"v":"SUPPORTED","c":"high","why":"the opinion applies the duty to bargain under sec 158(a)(5), as claimed"}
+}

@@ -1,0 +1,11 @@
+# Core extraction / normalization — Free Law Project, BSD-2
+eyecite>=2.7.8
+reporters-db>=3.2.66
+courts-db>=0.10.27
+
+# HTTP
+requests>=2.31.0
+
+# Ingest
+pdfplumber>=0.11.0     # PDF text + page offsets
+python-docx>=1.1.0     # .docx text + footnotes

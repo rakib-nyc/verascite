@@ -1,0 +1,20 @@
+{
+ "1":  {"v":"SUPPORTED","c":"medium","why":"passage is the reopening-doctrine discussion the proposition describes"},
+ "2":  {"v":"SUPPORTED","c":"high","why":"opinion quotes Rule 33 and both grounds the brief names"},
+ "3":  {"v":"SUPPORTED","c":"high","why":"court found a proscribed policy under R.S. 23:961 and awarded damages"},
+ "4":  {"v":"NOT_SUPPORTED","c":"low","why":"the brief states no proposition; nothing to evaluate"},
+ "5":  {"v":"NOT_SUPPORTED","c":"low","why":"string cite with no proposition; retrieved passage is the caption"},
+ "6":  {"v":"CONTRADICTED","c":"high","why":"brief says a lengthy contraband history is 'lacking here'; the opinion says the record DOES indicate one","span":"Although the record here does indicate a lengthy history of contraband problems"},
+ "7":  {"v":"NOT_SUPPORTED","c":"high","why":"Chenery concerns agency reasoning and administrative experience; it says nothing about the Equal Protection Clause or Medicare beneficiaries"},
+ "8":  {"v":"NOT_SUPPORTED","c":"low","why":"retrieved passage is the caption and facts; the cited page was not reached"},
+ "9":  {"v":"SUPPORTED","c":"high","why":"near-verbatim: singling out Huminski while permitting all others suggests the notices are not reasonable"},
+ "10": {"v":"SUPPORTED","c":"medium","why":"passage concerns adequacy of the default representations, adjacent to the stated holding"},
+ "11": {"v":"NOT_SUPPORTED","c":"medium","why":"Priester concerns limitations on Texas home-equity constitutional claims, not amendment or diversity"},
+ "12": {"v":"SUPPORTED","c":"high","why":"opinion states the statute prohibits an employer interfering with political affiliation"},
+ "13": {"v":"SUPPORTED","c":"medium","why":"the quoted language is present, though as the opinion quoting Vas-Cath"},
+ "14": {"v":"NOT_SUPPORTED","c":"low","why":"argumentative assertion about another court's holding; passage does not settle it"},
+ "15": {"v":"NOT_SUPPORTED","c":"low","why":"string cite with no proposition"},
+ "16": {"v":"SUPPORTED","c":"medium","why":"Kolstad concerns the punitive-damages standard the brief invokes"},
+ "17": {"v":"CONTRADICTED","c":"high","why":"brief asserts no direct injury is necessary as settled; the opinion says the Supreme Court has NOT decided that question","span":"The Supreme Court has not decided whether an Appointments Clause violation requires reversal where it appears to have done a party no direct harm"},
+ "18": {"v":"NOT_SUPPORTED","c":"high","why":"DeSoto is a Ninth Circuit decision attributed to the Eighth, and it holds leave should be freely given unless futile rather than granted 'only where' curable"}
+}

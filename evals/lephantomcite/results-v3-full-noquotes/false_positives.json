@@ -1,0 +1,502 @@
+[
+  {
+    "excerpt": 25,
+    "false_positive": "In  Deshotel v Wal-Mart Louisiana L.L.C. , 850 F.3d 742, 747 (5th Cir. 2017)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Deshotel v. Wal-Mart Louisiana L.L.C.', but 850 F.3d 742 is 'Amanda Riggio v. Wal-Mart Stores, Incorporated' (normalized overlap 0.33)."
+    }
+  },
+  {
+    "excerpt": 35,
+    "false_positive": "Cell Site Data , 724 F.3d 600 (5th Cir. 2013)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Cell Site Data', but 724 F.3d 600 is 'In re the United States' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 41,
+    "false_positive": "80 Fed. Reg. at 64,545, 64,590",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 50,
+    "false_positive": "Nat\u2019l Lime Ass\u2019n v. EPA, 627 F.2d 416, 431-34",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'EPA', but 627 F.2d 416 is 'National Lime Association v. Environmental Protection Agency and Douglas M. Costle, Administrator of Environmental Protection Agency' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 53,
+    "false_positive": "Allied Trades, AFL-CIO v. Brown, 656 F.2d 564, 567 (10th Cir. 1981)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Allied Trades, AFL-CIO v. Brown', but 656 F.2d 564 is 'Carpet, Linoleum & Resilient Tile Layers, Local Union No. 419 v. Brown' (normalized overlap 0.20)."
+    }
+  },
+  {
+    "excerpt": 55,
+    "false_positive": "62 Fed. Reg. at 39,069",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 55,
+    "false_positive": "62 Fed. Reg. at 39,069",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 72,
+    "false_positive": "Determination, 79 Fed. Reg. at 23,102 (J.A.257)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 72,
+    "false_positive": "Determination, 79 Fed. Reg. at 23,102 (J.A.257)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 72,
+    "false_positive": "Determination , 79 Fed. Reg. at 23,121 (J.A.276)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 72,
+    "false_positive": "79 Fed. Reg. at 23,121 (J.A.276)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 77,
+    "false_positive": "Mikes v. Strauss , 274 F.3d 687, 703 (2d Cir. 2001)",
+    "why": {
+      "case_name": "the document cites 'Mikes v. Strauss', but no case reported at 274 F.3d 687 bears that name. Candidates: 'Mikes v. Straus', 'Mikes v. Straus'."
+    }
+  },
+  {
+    "excerpt": 78,
+    "false_positive": "Spinella v. Pearce, 873 F.2d 701, 707 (3d Cir.1989)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Spinella v. Pearce', but 873 F.2d 701 is 'Ricardo Jalil v. Avdel Corporation' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 82,
+    "false_positive": "Citizen v. Nuclear Reg. Comm\u2019n , 901 F.2d 147",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Nuclear Reg. Comm\u2019n', but 901 F.2d 147 is 'Public Citizen v. Nuclear Regulatory Commission and the United States of America, Nuclear Utility Management and Resources Council, Intervenor' (normalized overlap 0.33)."
+    }
+  },
+  {
+    "excerpt": 82,
+    "false_positive": "Appalachian Power Co. v. E.P.A , 251 F.3d 1026, 1033 (D.C. Cir. 2001)",
+    "why": {
+      "case_name": "the document cites 'Appalachian Power Co. v. E.P.A', but no case reported at 251 F.3d 1026 bears that name. Candidates: 'Appalachian Power Co v. EPA', 'Appalachian Power Co. v. Environmental Protection Agency'.",
+      "year": "year mismatch: the document says 2001, the retrieved record was filed 2003-03-07 (a 2-year difference)."
+    }
+  },
+  {
+    "excerpt": 82,
+    "false_positive": "PanAmSat Corp. v. FCC , 198 F.3d 890, 897 (D.C. Cir. 1999)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'PanAmSat Corp. v. FCC', but 198 F.3d 890 is 'Panm Sat Corporation v. Federal Communications Commission and United States of America, Bellsouth Wireless, Inc., Intervenor' (normalized overlap 0.33)."
+    }
+  },
+  {
+    "excerpt": 82,
+    "false_positive": "70 Fed. Reg. at 25655",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 86,
+    "false_positive": "Grp. PLC v. Shire Pharm. Grp. PLC , 298 F.3d 136, 145-46 (2d Cir. 2002)",
+    "why": {
+      "case_name": "the document cites 'Grp. PLC v. Shire Pharm. Grp. PLC', but no case reported at 298 F.3d 136 bears that name. Candidates: 'Gryl ex rel. Shire Pharmaceuticals Group PLC v. Shire Pharmaceuticals Group PLC', 'Frank Gryl v. Shire Pharmaceuticals Group Plc'."
+    }
+  },
+  {
+    "excerpt": 106,
+    "false_positive": "Gatt Commc\u2019ns, Inc. v. PMC Assocs., LLC , 711 F.3d 68",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'PMC Assocs., LLC', but 711 F.3d 68 is 'Gatt Communications, Inc. v. PMC Associates, L.L.C.' (normalized overlap 0.33)."
+    }
+  },
+  {
+    "excerpt": 119,
+    "false_positive": "76 Fed. Reg. at 25,180 (emphasis added)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 124,
+    "false_positive": "Landry v. F.D.I.C., 204 F.3d 1125, 1130 (D.C. Cir. 2000)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Landry v. F.D.I.C.', but 204 F.3d 1125 is 'Landry v. Federal Deposit Insurance Corp.' (normalized overlap 0.20)."
+    }
+  },
+  {
+    "excerpt": 128,
+    "false_positive": "Contreras, 581 F.3d 1115",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Contreras', but 581 F.3d 1115 is 'Antoinette Dumont v. Ford Motor Credit Company' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 128,
+    "false_positive": "Id.",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Contreras', but None is 'Antoinette Dumont v. Ford Motor Credit Company' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 128,
+    "false_positive": "Id.",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Contreras', but None is 'Antoinette Dumont v. Ford Motor Credit Company' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 128,
+    "false_positive": "581 F.3d at 1164",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Contreras', but 581 F.3d 1164 is 'Antoinette Dumont v. Ford Motor Credit Company' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 129,
+    "false_positive": "Grigsby , 119 B.R. 310 (Bankr. E.D. Pa. 1990)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Grigsby', but 119 B.R. 310 is 'In Re Miracle Church of God in Christ' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 131,
+    "false_positive": "Messner Manor Assocs. v. Wis. Hous. & Econ. Dev. Auth., 555 N.W.2d 156 (Wis. Ct. App. 1996)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Messner Manor Assocs. v. Wis. Hous. & Econ. Dev. Auth.', but 555 N.W.2d 156 is 'Messner Manor Associates v. Wisconsin Housing & Economic Development Authority' (normalized overlap 0.25)."
+    }
+  },
+  {
+    "excerpt": 131,
+    "false_positive": "555 N.W.2d at 158-59",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Messner Manor Assocs. v. Wis. Hous. & Econ. Dev. Auth.', but 555 N.W.2d 158 is 'Messner Manor Associates v. Wisconsin Housing & Economic Development Authority' (normalized overlap 0.25)."
+    }
+  },
+  {
+    "excerpt": 131,
+    "false_positive": "Id.  at 159",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Messner Manor Assocs. v. Wis. Hous. & Econ. Dev. Auth.', but None is 'Messner Manor Associates v. Wisconsin Housing & Economic Development Authority' (normalized overlap 0.25)."
+    }
+  },
+  {
+    "excerpt": 131,
+    "false_positive": "Id.  at 160",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Messner Manor Assocs. v. Wis. Hous. & Econ. Dev. Auth.', but None is 'Messner Manor Associates v. Wisconsin Housing & Economic Development Authority' (normalized overlap 0.25)."
+    }
+  },
+  {
+    "excerpt": 131,
+    "false_positive": "id.  at 159",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Messner Manor Assocs. v. Wis. Hous. & Econ. Dev. Auth.', but None is 'Messner Manor Associates v. Wisconsin Housing & Economic Development Authority' (normalized overlap 0.25)."
+    }
+  },
+  {
+    "excerpt": 131,
+    "false_positive": "id.  at 160",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Messner Manor Assocs. v. Wis. Hous. & Econ. Dev. Auth.', but None is 'Messner Manor Associates v. Wisconsin Housing & Economic Development Authority' (normalized overlap 0.25)."
+    }
+  },
+  {
+    "excerpt": 131,
+    "false_positive": "id.  at 160",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Messner Manor Assocs. v. Wis. Hous. & Econ. Dev. Auth.', but None is 'Messner Manor Associates v. Wisconsin Housing & Economic Development Authority' (normalized overlap 0.25)."
+    }
+  },
+  {
+    "excerpt": 131,
+    "false_positive": "Id.  at 158-60",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Messner Manor Assocs. v. Wis. Hous. & Econ. Dev. Auth.', but None is 'Messner Manor Associates v. Wisconsin Housing & Economic Development Authority' (normalized overlap 0.25)."
+    }
+  },
+  {
+    "excerpt": 142,
+    "false_positive": "Hickman v. Taylor, 329 U.S. 495, 507 (1947). Patrick E. Higginbotham, Foreword, 49 ALA.L.REV. 1",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'ALA.L.REV.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 144,
+    "false_positive": "Soc\u2019y v. Tex. Hwy Dep\u2019t , 446 F.2d 1013 (5th Cir. 1971)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Soc\u2019 v. Tex. Hwy Dep\u2019t', but 446 F.2d 1013 is 'Named Individual Members of the San Antonio Conservation Society v. The Texas Highway Department, and the United States Department Oftransportation' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 150,
+    "false_positive": "NRDC v. EPA, 464 F.3d at 3",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'NRDC', but 464 F.3d 3 is 'Natural Resources Defense Council v. Environmental Protection Agency' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 161,
+    "false_positive": "Roadway Express v. Pipe, 447 U.S. 752 at 757 (1982)",
+    "why": {
+      "year": "year mismatch: the document says 1982, the retrieved record was filed 1980-06-23 (a 2-year difference)."
+    }
+  },
+  {
+    "excerpt": 162,
+    "false_positive": "(9th Cir. 1996) 111 F.3d 1427, 1443",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites '9th Cir. 1996', but 111 F.3d 1427 is 'Columbia Steel Casting Co. v. Portland General Electric Co.' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 162,
+    "false_positive": "Cockerell v. Title&Ins. Co., 42 Cal. 284, 292-293 (1954)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Cockerell v. Title&Ins. Co.', but 42 Cal. 284 is 'White v. Lyons' (normalized overlap 0.00).",
+      "year": "year mismatch: the document says 1954, the retrieved record was filed 1871-10-15 (a 83-year difference)."
+    }
+  },
+  {
+    "excerpt": 165,
+    "false_positive": "Dual Inc. v. Lockheed Martin Corp. , 827 A.2d 1095, 1105-06 (Md. 2004)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Dual Inc. v. Lockheed Martin Corp.', but 827 A.2d 1095 is 'State v. Thomas' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 170,
+    "false_positive": "Mathis v. Goldberg , 538 Fed. App\u2019x. 310",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. App\u2019x.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 170,
+    "false_positive": "Jordahl v. Democratic Party of Va. , 122 F.3d 191, 196 (4th Cir. 2002)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Jordahl v. Democratic Party of Va.', but 122 F.3d 191 is 'United States v. Amanda Mitchell, AKA Amanda Foster, Amanda Mitchell' (normalized overlap 0.00).",
+      "year": "year mismatch: the document says 2002, the retrieved record was filed 1997-09-09 (a 5-year difference)."
+    }
+  },
+  {
+    "excerpt": 171,
+    "false_positive": "Reyes v. Pac. Bell, 21 F.3d 1115",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Reyes v. Pac. Bell', but 21 F.3d 1115 is 'Lynda Loie Paxton Stephen R. Blanchard, Esq. v. Oxnard Police Dept.' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 171,
+    "false_positive": "Id.",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Reyes v. Pac. Bell', but None is 'Lynda Loie Paxton Stephen R. Blanchard, Esq. v. Oxnard Police Dept.' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 179,
+    "false_positive": "FDIC v. Faulkner , 991 F.2d 262, 267 (5th Cir. 1993)",
+    "why": {
+      "case_name": "the document cites 'FDIC v. Faulkner', but no case reported at 991 F.2d 262 bears that name. Candidates: 'Federal Deposit Insurance Corporation v. D.L. Faulkner', 'Federal Deposit Insurance v. Faulkner'."
+    }
+  },
+  {
+    "excerpt": 180,
+    "false_positive": "OMB FOIA Guidelines, 52 Fed. Reg. at 10,015 (distinguishing active and passive distributors)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 187,
+    "false_positive": "Determination , 79 Fed. Reg. at 23,122",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 205,
+    "false_positive": "Liehe, Inc. v. N. Cal. Collection Serv., Inc., 911 F.2d 242, 247 (9th Cir. 1990)",
+    "why": {
+      "case_name": "the document cites 'Liehe, Inc. v. N. Cal. Collection Serv., Inc.', but no case reported at 911 F.2d 242 bears that name. Candidates: 'Cook, Perkiss & Liehe, Inc. v. Northern California Collection Service Inc.', 'Cook, Perkiss And Liehe, Inc. v. Northern California Collection Service Inc.'."
+    }
+  },
+  {
+    "excerpt": 221,
+    "false_positive": "United States v. Rios-Morales, 541 Fed. App\u2019x 373 (5th Cir. 2013)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. App\u2019x' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 222,
+    "false_positive": "Goodman v. Pa. Tpk. Comm'n, 293 F.3d 655, 670 (3d Cir. 2002)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites \"Goodman v. Pa. Tpk. Comm'n\", but 293 F.3d 655 is 'Goodman v. Pennsylvania Turnpike Commission' (normalized overlap 0.25)."
+    }
+  },
+  {
+    "excerpt": 225,
+    "false_positive": "Association of Battery Recyclers, Inc. v. EPA , 716 F.3d 667, 673 (D.C. Cir. 2013)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'EPA', but 716 F.3d 667 is 'Association of Battery Recyclers, Inc. v. Environmental Protection Agency' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 225,
+    "false_positive": "76 FR at 15,632(JA  )",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'FR' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 225,
+    "false_positive": "75 FR at 32,026(JA  )",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'FR' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 229,
+    "false_positive": "Quinchia v. Att\u2019y Gen., 552 F.3d 1255, 1258 (11th Cir. 2008)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Quinchia v. Att\u2019y Gen.', but 552 F.3d 1255 is 'Quinchia v. U.S. Attorney General' (normalized overlap 0.33)."
+    }
+  },
+  {
+    "excerpt": 239,
+    "false_positive": "FDIC v. Abraham, 137 F.3d 264, 269 (5th Cir. 1998)",
+    "why": {
+      "case_name": "the document cites 'FDIC v. Abraham', but no case reported at 137 F.3d 264 bears that name. Candidates: 'Federal Deposit Insurance v. Abraham', 'Federal Deposit Insurance Corporation v. Abraham'."
+    }
+  },
+  {
+    "excerpt": 243,
+    "false_positive": "All, Inc. v. Casa Marina Owner, LLC , 607 F.2d 1001 vacated, 264 Fed. App\u2019x 792 (11th Cir. 2008)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. App\u2019x' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 243,
+    "false_positive": "Kallen, 775 F. Supp. 2d 178",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Kallen', but 775 F. Supp. 2d 178 is 'Quick v. United States Department of Commerce, National Institute of Standards & Technology' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 243,
+    "false_positive": "Casa Marina Owner, LLC, 607 F.2d 1001",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Casa Marina Owner, LLC', but 607 F.2d 1001 is 'Johnson v. Collins' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 258,
+    "false_positive": "FDIC v. McFarland , 243 F.3d 876",
+    "why": {
+      "case_name": "the document cites 'FDIC v. McFarland', but no case reported at 243 F.3d 876 bears that name. Candidates: '?', 'Federal Deposit Insurance v. McFarland'."
+    }
+  },
+  {
+    "excerpt": 263,
+    "false_positive": "Bluewater Network v. EPA, 370 F.3d 1, 13 (D.C. Cir. 2004)",
+    "why": {
+      "case_name": "the document cites 'Bluewater Network v. EPA', but no case reported at 370 F.3d 1 bears that name. Candidates: 'Bluewater Ntwrk v. EPA', 'Bluewater Network v. Environmental Protection Agency'."
+    }
+  },
+  {
+    "excerpt": 269,
+    "false_positive": "1998 DOLWH LEXIS 89 (Nov. 19, 1998)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'DOLWH LEXIS' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 269,
+    "false_positive": "Gieg v. DRR, Inc., 407 F.3d 1038, 1045 (9th Cir. 2005)",
+    "why": {
+      "case_name": "the document cites 'Gieg v. DRR, Inc.', but no case reported at 407 F.3d 1038 bears that name. Candidates: 'Gieg v. Ddr, Inc.', '?'."
+    }
+  },
+  {
+    "excerpt": 269,
+    "false_positive": "Vela v. City of Houston, 216 F.3d 659, 667 (5th Cir. 2001)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Vela v. City of Houston', but 216 F.3d 659 is 'United States of America, Plaintiff-Appellee/cross-Appellant v. Michael D. Andreas and Terrance S. Wilson, Defendants-Appellants/cross-Appellees' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 275,
+    "false_positive": "N. Am. LLC v. Mylan Pharm. Inc., 978 F.3d 1374, 1381 (Fed. Cir. 2020)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'N. Am. LLC v. Mylan Pharm. Inc.', but 978 F.3d 1374 is 'Valeant Pharmaceuticals v. Mylan Pharmaceuticals' (normalized overlap 0.33)."
+    }
+  },
+  {
+    "excerpt": 283,
+    "false_positive": "Implementation of the Fair Housing Act\u2019s Discriminatory Effects Standard, 78 Fed. Reg. at 11,482",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 284,
+    "false_positive": "United States v. Braswell , 687 F.3d 671, 675 (5th Cir. 2012)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'United States v. Braswell', but 687 F.3d 671 is 'Petrofac, Inc. v. DynMcDermott Petroleum Operations Co.' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 285,
+    "false_positive": "77 Fed. Reg. at 53,159-53,160",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 285,
+    "false_positive": "Inst. v. EPA , 452 F.3d 930, 939 (D.C. Cir. 2006)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Inst. v. EPA', but 452 F.3d 930 is 'American Coke & Coal Chemicals Institute v. Environmental Protection Agency' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 292,
+    "false_positive": "Petchem, Inc. v. Fed. Mar. Comm\u2019n , 853 F.2d 958, 962 (D.C. Cir. 1988)",
+    "why": {
+      "case_name": "the document cites 'Petchem, Inc. v. Fed. Mar. Comm\u2019n', but no case reported at 853 F.2d 958 bears that name. Candidates: 'Petchem, Inc. v. Federal Maritime Commission', 'Petchem, Inc. v. Federal Maritime Commission'."
+    }
+  },
+  {
+    "excerpt": 294,
+    "false_positive": "Edison Co. of N.Y. v. NLRB , 305 U.S. 197, 229 (1938)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'NLRB', but 305 U.S. 197 is 'Consolidated Edison Co. v. National Labor Relations Board' (normalized overlap 0.00)."
+    }
+  }
+]

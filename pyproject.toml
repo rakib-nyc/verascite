@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "verascite"
+version = "0.1.0"
+description = "Open-source legal citation verification: detect hallucinated, fabricated, and misrepresented case citations in briefs and AI-generated legal writing."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [{ name = "Muhammad Rakibul Islam", email = "rakib.islam@rutgers.edu" }]
+maintainers = [{ name = "Muhammad Rakibul Islam", email = "rakib.islam@rutgers.edu" }]
+keywords = [
+    "legal", "legaltech", "law", "legal-research", "citation", "citation-checker",
+    "citation-verification", "cite-checking", "hallucination", "hallucination-detection",
+    "ai-hallucination", "fabricated-citations", "phantom-citations", "case-law",
+    "caselaw", "courtlistener", "caselaw-access-project", "eyecite", "litigation",
+    "brief-checking", "legal-writing", "rule-11", "sanctions", "e-discovery",
+    "llm-evaluation", "ai-safety", "retrieval-augmented-generation", "nlp",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Legal Industry",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+    "Typing :: Typed",
+]
+dependencies = [
+    "eyecite>=2.7.8",
+    "reporters-db>=3.2.66",
+    "courts-db>=0.10.27",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+pdf = ["pdfplumber>=0.11.0"]
+docx = ["python-docx>=1.1.0"]
+dev = ["pytest>=7.4", "hypothesis>=6.90"]
+all = ["pdfplumber>=0.11.0", "python-docx>=1.1.0"]
+
+[project.scripts]
+verascite = "verascite.run_audit:main"
+
+[project.urls]
+Homepage = "https://github.com/rakib-nyc/verascite"
+Documentation = "https://rakib-nyc.github.io/verascite/"
+Repository = "https://github.com/rakib-nyc/verascite"
+Issues = "https://github.com/rakib-nyc/verascite/issues"
+Changelog = "https://github.com/rakib-nyc/verascite/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+include = ["verascite*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "evals"]
+markers = ["live: needs real network access and a CourtListener API token"]
+addopts = '-m "not live"'

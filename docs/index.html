@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeraScite — Legal Citation Verification That Never Guesses</title>
+<meta name="description" content="Open-source legal citation verification. Detect fabricated, misattributed, and misrepresented case citations in briefs and AI-generated legal writing, with evidence for every finding. Apache 2.0.">
+<meta name="keywords" content="legal citation verification, AI hallucination detection, fabricated case citations, cite checking, legal brief validation, Rule 11, caselaw verification, CourtListener, Caselaw Access Project, legal tech, litigation technology, citation checker, open source legaltech">
+<meta name="author" content="Muhammad Rakibul Islam">
+<link rel="canonical" href="https://rakib-nyc.github.io/verascite/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VeraScite — Legal Citation Verification That Never Guesses">
+<meta property="og:description" content="Detect fabricated and misrepresented case citations in legal briefs. Absence of evidence is never reported as fabrication. Open source, Apache 2.0.">
+<meta property="og:url" content="https://rakib-nyc.github.io/verascite/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="VeraScite — Legal Citation Verification That Never Guesses">
+<meta name="twitter:description" content="Detect fabricated and misrepresented case citations in legal briefs. Open source, Apache 2.0.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23003153'/><text x='16' y='23' font-family='monospace' font-size='19' font-weight='700' fill='%23fff' text-anchor='middle'>*</text></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"VeraScite",
+"applicationCategory":"DeveloperApplication","operatingSystem":"Cross-platform",
+"description":"Open-source legal citation verification. Detects fabricated, misattributed, and misrepresented case citations in legal briefs and AI-generated legal writing.",
+"softwareVersion":"0.1.0","license":"https://www.apache.org/licenses/LICENSE-2.0",
+"author":{"@type":"Person","name":"Muhammad Rakibul Islam","email":"rakib.islam@rutgers.edu"},
+"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+"codeRepository":"https://github.com/rakib-nyc/verascite","programmingLanguage":"Python"}
+</script>
+<style>
+:root{
+  --ink:#0A1B2A; --prussian:#003153; --azure:#1668B0; --azure-lift:#E8F0F7;
+  --page:#FFFFFF; --wash:#F3F7FA; --shelf:#DEE8F0;
+  --rule:#D5E0E9; --rule-soft:#E7EEF4;
+  --text:#12222F; --muted:#51687A; --faint:#8296A5;
+  /* Absence is neutral. It is not a warning, and must not look like one. */
+  --absent:#5A6B79; --absent-bg:#EDF1F4;
+  --flag:#A8271F; --flag-bg:#FBECEA;
+  --ok:#1D5B41; --ok-bg:#E8F1ED;
+  --rail:104px; --w:1240px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--page);color:var(--text);
+  font-family:'Public Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:-.032em;line-height:1.05;margin:0;color:var(--ink)}
+h1{font-size:clamp(2.4rem,5.2vw,3.9rem)}
+h2{font-size:clamp(1.75rem,3.2vw,2.5rem)}
+h3{font-size:1.16rem;font-weight:600;letter-spacing:-.014em;line-height:1.3}
+p{margin:0 0 1rem}
+a{color:var(--azure);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--azure);outline-offset:3px}
+code,.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}
+
+/* ---- the reporter page: a fixed left rail carrying page marks ---- */
+.sheet{max-width:var(--w);margin:0 auto;display:grid;grid-template-columns:var(--rail) minmax(0,1fr);gap:0}
+.rail{border-right:1px solid var(--rule);padding:0 18px 0 24px;position:relative}
+.rail .mark{position:sticky;top:96px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;
+  color:var(--faint);letter-spacing:.04em;line-height:1.7;padding-top:4px}
+.rail .mark b{display:block;color:var(--prussian);font-weight:600;font-size:.8rem}
+.body{padding:0 clamp(20px,4vw,64px) 0 clamp(24px,4vw,56px);min-width:0}
+@media(max-width:900px){
+  .sheet{grid-template-columns:1fr}
+  .rail{border-right:none;border-bottom:1px solid var(--rule);padding:14px 20px}
+  .rail .mark{position:static;display:flex;gap:10px;align-items:baseline}
+  .rail .mark b{display:inline}
+  .body{padding:0 20px}
+}
+section{border-bottom:1px solid var(--rule)}
+.pad{padding:clamp(56px,7vw,96px) 0}
+
+/* ---- header ---- */
+header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.94);
+  backdrop-filter:saturate(180%) blur(8px);border-bottom:1px solid var(--rule)}
+nav{max-width:var(--w);margin:0 auto;padding:0 clamp(20px,3vw,24px);height:60px;display:flex;align-items:center;gap:22px}
+.brand{display:flex;align-items:baseline;gap:9px;font-family:'Archivo',sans-serif;font-weight:700;
+  font-size:1.08rem;color:var(--ink);letter-spacing:-.028em}
+.brand:hover{text-decoration:none}
+.brand i{font-family:'IBM Plex Mono',monospace;font-style:normal;color:var(--azure);font-size:1.2rem}
+.nl{margin-left:auto;display:flex;gap:22px;align-items:center}
+.nl a{color:var(--muted);font-size:.9rem;font-weight:500}
+.nl a:hover{color:var(--prussian);text-decoration:none}
+.nl .gh{border:1px solid var(--rule);padding:6px 14px;border-radius:4px;color:var(--prussian)!important;font-weight:600}
+.nl .gh:hover{background:var(--wash)}
+@media(max-width:880px){.nl a:not(.gh){display:none}}
+
+/* ---- hero ---- */
+.hero .body{padding-top:clamp(48px,6vw,84px);padding-bottom:clamp(48px,6vw,80px)}
+.kicker{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:22px}
+h1{max-width:17ch}
+.thesis{font-size:1.16rem;color:var(--muted);max-width:58ch;margin-top:22px}
+.acts{display:flex;flex-wrap:wrap;gap:11px;margin-top:30px}
+.btn{display:inline-flex;align-items:center;padding:11px 20px;border-radius:4px;font-weight:600;
+  font-size:.93rem;transition:background .16s,border-color .16s;cursor:pointer}
+.b1{background:var(--prussian);color:#fff;border:1px solid var(--prussian)}
+.b1:hover{background:#00243E;text-decoration:none}
+.b2{color:var(--prussian);border:1px solid var(--rule);background:#fff}
+.b2:hover{background:var(--wash);text-decoration:none}
+.smallnote{margin-top:20px;font-size:.86rem;color:var(--faint)}
+
+/* ---- SIGNATURE: the dissected citation ---- */
+.spec{margin-top:clamp(38px,5vw,56px);border:1px solid var(--rule);background:var(--wash);border-radius:6px;overflow:hidden}
+.spec-h{padding:11px 18px;border-bottom:1px solid var(--rule);background:#fff;
+  font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted)}
+.spec-b{padding:clamp(24px,4vw,38px) clamp(18px,3vw,34px);overflow-x:auto}
+.cite{display:flex;flex-wrap:nowrap;align-items:flex-start;gap:0;
+  font-family:'IBM Plex Mono',monospace;font-size:clamp(.86rem,1.5vw,1.06rem);min-width:660px}
+.part{display:flex;flex-direction:column;gap:9px;padding:0 3px}
+.part .tok{color:var(--ink);font-weight:500;white-space:nowrap;padding:5px 6px;border-radius:3px}
+.part .brk{height:8px;border-left:1px solid var(--rule);border-right:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);margin:0 3px}
+.part .lab{font-family:'Public Sans',sans-serif;font-size:.68rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--faint);text-align:center;white-space:nowrap}
+.part .vd{font-family:'Public Sans',sans-serif;font-size:.72rem;font-weight:600;text-align:center;white-space:nowrap}
+.part.punc{padding-top:5px;color:var(--faint)}
+.pass .tok{background:var(--ok-bg)} .pass .vd{color:var(--ok)}
+.fail .tok{background:var(--flag-bg);box-shadow:inset 0 -2px 0 var(--flag)} .fail .vd{color:var(--flag)}
+.spec-f{border-top:1px solid var(--rule);background:#fff;padding:15px 18px;font-size:.9rem;color:var(--muted)}
+.spec-f b{color:var(--ink);font-weight:600}
+
+/* ---- the axiom ---- */
+.axiom{border:1px solid var(--rule);border-left:3px solid var(--prussian);
+  background:var(--azure-lift);padding:26px 30px;border-radius:0 5px 5px 0;max-width:76ch}
+.axiom .big{font-family:'Archivo',sans-serif;font-weight:700;font-size:clamp(1.3rem,2.4vw,1.72rem);
+  letter-spacing:-.026em;line-height:1.2;color:var(--ink);margin:0 0 13px}
+.axiom .sm{margin:0;font-size:.97rem;color:#3D556A}
+
+/* ---- chips ---- */
+.chip{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.71rem;font-weight:600;
+  letter-spacing:.045em;padding:3px 8px;border-radius:3px;white-space:nowrap}
+.k-flag{background:var(--flag-bg);color:var(--flag);border:1px solid #E7C9C5}
+.k-abs{background:var(--absent-bg);color:var(--absent);border:1px solid #D3DCE3}
+.k-ok{background:var(--ok-bg);color:var(--ok);border:1px solid #C8DED4}
+.k-rev{background:var(--azure-lift);color:var(--azure);border:1px solid #C9DCEB}
+
+/* ---- split compare ---- */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule);
+  border-radius:6px;overflow:hidden;margin-top:30px}
+.split>div{padding:26px}
+.split>div+div{border-left:1px solid var(--rule)}
+@media(max-width:820px){.split{grid-template-columns:1fr}.split>div+div{border-left:none;border-top:1px solid var(--rule)}}
+.split .hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.split pre{margin:12px 0 0;font-family:'IBM Plex Mono',monospace;font-size:.82rem;
+  line-height:1.65;color:var(--ink);overflow-x:auto}
+.split p{font-size:.94rem;color:var(--muted);margin:0}
+
+/* ---- tables ---- */
+.tw{overflow-x:auto;border:1px solid var(--rule);border-radius:6px;margin-top:26px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:.93rem;min-width:540px}
+th,td{padding:12px 17px;text-align:left;border-bottom:1px solid var(--rule-soft)}
+th{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;background:var(--wash)}
+tr:last-child td{border-bottom:none}
+.num{text-align:right;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+tr.mine td{background:var(--azure-lift);font-weight:600;color:var(--ink)}
+td small{color:var(--faint);font-weight:400}
+
+/* ---- dark punctuation ---- */
+.dark{background:var(--ink);border-bottom:none}
+.dark h2,.dark h3{color:#fff}
+.dark .rail{border-right-color:#1B3348}
+.dark .rail .mark{color:#5E7787} .dark .rail .mark b{color:#7FB0D4}
+.dark p{color:#9FB4C3}
+.dark .tw{border-color:#1B3348;background:#0D2334}
+.dark th{background:#122A3D;color:#88A8BC}
+.dark td{border-color:#1B3348;color:#C4D3DE}
+.dark tr.mine td{background:#0F2E45;color:#fff}
+@media(max-width:900px){.dark .rail{border-bottom-color:#1B3348}}
+
+/* ---- pipeline: genuinely a sequence, so it is numbered ---- */
+.seq{margin-top:28px;border-top:1px solid var(--rule)}
+.seq .row{display:grid;grid-template-columns:38px 148px 1fr;gap:20px;padding:16px 0;
+  border-bottom:1px solid var(--rule);align-items:baseline}
+.seq .n{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--azure);font-weight:600}
+.seq .t{font-weight:600;color:var(--ink)}
+.seq .d{color:var(--muted);font-size:.94rem}
+@media(max-width:760px){.seq .row{grid-template-columns:32px 1fr;}.seq .d{grid-column:2}}
+
+/* ---- code ---- */
+pre.code{background:var(--wash);border:1px solid var(--rule);border-radius:5px;padding:16px 18px;
+  overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:.83rem;line-height:1.7;margin:14px 0 0}
+.dark pre.code{background:#0D2334;border-color:#1B3348;color:#C4D3DE}
+.tk{color:#6FA9D0} .ts{color:#7FC3A2} .tc{color:#5E7787} .ty{color:#DBB479}
+
+.term{border:1px solid #1B3348;border-radius:6px;overflow:hidden;background:#0D2334;margin-top:14px}
+.term .bar{padding:9px 14px;border-bottom:1px solid #1B3348;background:#122A3D;
+  font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:#7492A6}
+.term pre{margin:0;padding:17px;overflow-x:auto;font-family:'IBM Plex Mono',monospace;
+  font-size:.81rem;line-height:1.75;color:#C4D3DE}
+
+.note{border:1px solid var(--rule);border-left:3px solid var(--absent);background:var(--wash);
+  padding:18px 20px;border-radius:0 5px 5px 0;margin-top:22px}
+.note.stop{border-left-color:var(--flag);background:var(--flag-bg)}
+.note p{margin:0;font-size:.94rem;color:var(--muted)}
+.note p+p{margin-top:9px}
+.note b{color:var(--ink)}
+.lede{color:var(--muted);max-width:64ch;margin-top:18px}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4vw,52px)}
+@media(max-width:900px){.two{grid-template-columns:1fr;gap:34px}}
+
+ul.plain{list-style:none;padding:0;margin:14px 0 0}
+ul.plain li{padding:11px 0;border-bottom:1px solid var(--rule-soft);font-size:.95rem;color:var(--muted)}
+ul.plain li b{color:var(--ink);font-weight:600}
+ul.plain li:last-child{border-bottom:none}
+
+footer{background:var(--ink);color:#8CA4B5;padding:56px 0 34px}
+footer .sheet{grid-template-columns:var(--rail) minmax(0,1fr)}
+@media(max-width:900px){footer .sheet{grid-template-columns:1fr}}
+footer .rail{border-right-color:#1B3348}
+@media(max-width:900px){footer .rail{border-bottom-color:#1B3348}}
+footer h4{color:#fff;font-size:.72rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;margin:0 0 12px}
+footer a{color:#A7C2D5} footer a:hover{color:#fff}
+.fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px}
+@media(max-width:860px){.fg{grid-template-columns:1fr 1fr}}
+footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
+.fb{margin-top:34px;padding-top:20px;border-top:1px solid #1B3348;display:flex;flex-wrap:wrap;
+  gap:14px;justify-content:space-between;font-size:.84rem;color:#6B8497}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:8px;top:8px;z-index:100;background:#fff;padding:9px 15px;border:2px solid var(--prussian);border-radius:4px}
+
+/* one orchestrated moment: the checks resolve in order, as the tool does */
+@media (prefers-reduced-motion:no-preference){
+  .part .vd{opacity:0;animation:res .34s ease forwards}
+  .part:nth-child(1) .vd{animation-delay:.35s} .part:nth-child(3) .vd{animation-delay:.5s}
+  .part:nth-child(5) .vd{animation-delay:.65s} .part:nth-child(7) .vd{animation-delay:.8s}
+  .part:nth-child(9) .vd{animation-delay:.95s} .part:nth-child(11) .vd{animation-delay:1.1s}
+  @keyframes res{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+
+<header>
+<nav>
+  <a href="#" class="brand"><i>*</i>VeraScite</a>
+  <div class="nl">
+    <a href="#failure">Failure modes</a>
+    <a href="#verdicts">Verdicts</a>
+    <a href="#results">Results</a>
+    <a href="#rejected">What we rejected</a>
+    <a href="#use">Use</a>
+    <a class="gh" href="https://github.com/rakib-nyc/verascite">GitHub</a>
+  </div>
+</nav>
+</header>
+
+<main id="main">
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*544</b>VeraScite 0.1.0</div></div>
+    <div class="body">
+      <div class="kicker">Independent research &nbsp;/&nbsp; Apache 2.0 &nbsp;/&nbsp; not legal advice</div>
+      <h1>A citation is an address. Verification means going there.</h1>
+      <p class="thesis">
+        <code class="mono">550 U.S. 544, 555 (2007)</code> is a coordinate: volume, reporter,
+        page, pincite, year. Every part of it can be checked independently against the
+        published record — and every part can be wrong on its own. VeraScite checks each
+        one and shows you what it found.
+      </p>
+      <div class="acts">
+        <a class="btn b1" href="#use">Read the integration guide</a>
+        <a class="btn b2" href="https://github.com/rakib-nyc/verascite">Source on GitHub</a>
+      </div>
+      <p class="smallnote">Experimental research software. No warranty. Human verification by a licensed attorney is required.</p>
+
+      <!-- SIGNATURE -->
+      <div class="spec">
+        <div class="spec-h">Citation resolved against the published record</div>
+        <div class="spec-b">
+          <div class="cite">
+            <div class="part pass"><span class="tok">Bell Atlantic Corp. v. Twombly</span><span class="brk"></span><span class="lab">case name</span><span class="vd">matches record</span></div>
+            <div class="part punc"><span class="tok">,</span></div>
+            <div class="part pass"><span class="tok">550</span><span class="brk"></span><span class="lab">volume</span><span class="vd">exists</span></div>
+            <div class="part pass"><span class="tok">U.S.</span><span class="brk"></span><span class="lab">reporter</span><span class="vd">published</span></div>
+            <div class="part pass"><span class="tok">544</span><span class="brk"></span><span class="lab">first page</span><span class="vd">resolves</span></div>
+            <div class="part punc"><span class="tok">,</span></div>
+            <div class="part fail"><span class="tok">555</span><span class="brk"></span><span class="lab">pincite</span><span class="vd">quote not on page</span></div>
+            <div class="part pass"><span class="tok">(2007)</span><span class="brk"></span><span class="lab">year</span><span class="vd">matches</span></div>
+          </div>
+        </div>
+        <div class="spec-f">
+          Six of seven parts check out. The seventh is the finding — and it is the kind no
+          format review catches, because <b>the case is real, the reporter is real, and the
+          citation is perfectly formed.</b>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAILURE MODES ===== -->
+<section id="failure" class="pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*545</b>Failure modes</div></div>
+    <div class="body">
+      <h2>Two problems that look identical on the page</h2>
+      <p class="lede">
+        Both citations below are correctly formatted. One names a reporter series that has
+        never been published in the United States. The other is a real decision that simply
+        has not reached free archives. A reviewer reading for form cannot tell them apart —
+        and neither can a tool that only asks whether it found a match.
+      </p>
+      <div class="split">
+        <div>
+          <div class="hd"><span class="chip k-flag">FLAGGED</span></div>
+          <p>The reporter abbreviation does not appear in the catalogue of every reporter
+            recognised in American law. This is an affirmative finding, backed by evidence.</p>
+          <pre>Smith v. Fictional Reporter Co.,
+    88 Jurisprudentia 100 (9th Cir. 2018)</pre>
+        </div>
+        <div>
+          <div class="hd"><span class="chip k-abs">UNVERIFIED</span></div>
+          <p>A vendor-only identifier for a real decision. Absent from free archives as a
+            matter of course. Reporting this as fabrication would be a false accusation.</p>
+          <pre>Tinch v. Video Indus. Servs., Inc.,
+    2019 WL 1396975 (E.D. Mich. 2019)</pre>
+        </div>
+      </div>
+      <p class="lede" style="margin-top:26px">
+        Invented cases also get the attention they deserve — but they are the minority. The
+        larger share of defects are real, published, verifiable decisions cited for something
+        they do not hold, or quoted inaccurately, or pincited to the wrong page. Those survive
+        every check short of reading the opinion.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VERDICTS ===== -->
+<section id="verdicts" class="dark pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*546</b>Verdicts</div></div>
+    <div class="body">
+      <div class="axiom" style="background:#0F2E45;border-color:#1B3348;border-left-color:#7FB0D4">
+        <p class="big" style="color:#fff">Absence of evidence is never evidence of fabrication.</p>
+        <p class="sm" style="color:#9FB4C3">
+          If VeraScite cannot find a case, it reports <span class="chip k-abs">UNVERIFIED</span>
+          and names the sources it searched. It never reports that the case is fake. There is
+          no <code>FABRICATED</code> verdict anywhere in the codebase, by design.
+        </p>
+      </div>
+      <p style="margin-top:30px;max-width:64ch">
+        Telling an attorney that a sound citation is fabricated costs more than staying quiet
+        about a defect. So the two states are kept structurally apart — including in their
+        colour: absence is rendered in neutral slate, never in warning amber, because
+        absence is not a warning.
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Result</th><th>What it means</th><th>What it does not mean</th></tr></thead>
+          <tbody>
+            <tr><td><span class="chip k-flag">FLAGGED</span></td>
+                <td>A retrieved source contradicts the document. Evidence attached.</td><td>—</td></tr>
+            <tr><td><span class="chip k-abs">UNVERIFIED</span></td>
+                <td>Absent from the sources consulted. Check by hand.</td>
+                <td><b style="color:#fff">Not a finding of fabrication.</b></td></tr>
+            <tr><td><span class="chip k-rev">REVIEW</span></td>
+                <td>Something needs a human read.</td><td>Not a failure.</td></tr>
+            <tr><td><span class="chip k-ok">VERIFIED</span></td>
+                <td>Confirmed on every dimension checked.</td>
+                <td>Not a statement that it is still good law.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== RESULTS ===== -->
+<section id="results" class="pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*547</b>Measured</div></div>
+    <div class="body">
+      <h2>What it catches, and what it misses</h2>
+      <p class="lede">
+        Measured on a public benchmark of hallucinated legal citations: 387 scored excerpts,
+        1,334 citations, 321 labelled defects. Every figure is a measurement on the full
+        corpus — not a projection, not a sample.
+      </p>
+      <div class="two" style="margin-top:34px">
+        <div>
+          <h3>Against the strongest published baseline</h3>
+          <div class="tw">
+            <table>
+              <thead><tr><th>System</th><th class="num">Prec.</th><th class="num">Recall</th><th class="num">F1</th></tr></thead>
+              <tbody>
+                <tr class="mine"><td>VeraScite <small>+ model layer</small></td><td class="num">86.4%</td><td class="num">59.2%</td><td class="num">70.2%</td></tr>
+                <tr><td>Published baseline</td><td class="num">76.1%</td><td class="num">62.8%</td><td class="num">68.8%</td></tr>
+                <tr><td>VeraScite <small>deterministic only</small></td><td class="num">83.3%</td><td class="num">24.0%</td><td class="num">37.3%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            <p><b>Read this honestly.</b> The F1 lead is 1.4 points — about four citations out
+            of 321. That is ahead, but nobody should call it decisive. Recall is 3.6 points
+            <em>behind</em> the baseline. The trade is deliberate: here, a false accusation
+            costs more than a miss.</p>
+            <p>The baseline figure is taken from published results and has not been
+            independently reproduced here.</p>
+          </div>
+        </div>
+        <div>
+          <h3>By defect type</h3>
+          <div class="tw">
+            <table>
+              <thead><tr><th>Defect</th><th class="num">Found</th><th class="num">Of</th><th class="num">Recall</th></tr></thead>
+              <tbody>
+                <tr><td>Non-existent citation</td><td class="num">31</td><td class="num">32</td><td class="num">96.9%</td></tr>
+                <tr><td>Content misrepresentation <small>model</small></td><td class="num">115</td><td class="num">131</td><td class="num">87.8%</td></tr>
+                <tr><td>Case name mismatch</td><td class="num">42</td><td class="num">63</td><td class="num">66.7%</td></tr>
+                <tr><td>Wrong pincite</td><td class="num">7</td><td class="num">53</td><td class="num">13.2%</td></tr>
+                <tr><td>Misquotation</td><td class="num">0</td><td class="num">42</td><td class="num">0.0%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ul class="plain">
+            <li><b>0 of 101</b> — false alarms on citations absent from every consulted source. The rule, measured.</li>
+            <li><b>295 tests</b> — network blocked at the socket layer, so no credential can reach a test.</li>
+            <li><b>Misquotation is 0%</b> and pincite recall is 13.2%. Both are stated because a tool that hides its blind spots is worse than one that names them.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== REJECTED ===== -->
+<section id="rejected" class="pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*548</b>Rejected</div></div>
+    <div class="body">
+      <h2>Three checks that would have raised recall, and were not shipped</h2>
+      <p class="lede">
+        Each was implemented, measured, and discarded. All three failed the same way: a rare
+        defect on a noisy channel, where a balanced test flatters a check that collapses at
+        the real base rate.
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Approach</th><th class="num">Would gain</th><th>Measured outcome</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Flag a pincite when the proposition is absent from the cited page</td>
+              <td class="num">46</td>
+              <td>Balanced sample read 77% recall / 77% specificity. At the true base rate —
+                29 wrong pincites against 562 sound ones — it produces
+                <b>128 false accusations for 22 findings. 14.9% precision.</b></td>
+            </tr>
+            <tr>
+              <td>Flag a quotation that does not match the source text</td>
+              <td class="num">42</td>
+              <td>A <em>correct</em> quotation matches its source at a median of 0.929, not
+                1.00, because both the brief and the archive are scanned text. Misquotes sit
+                at 0.719. Every threshold was swept:
+                <b>precision peaks at 17.2%.</b></td>
+            </tr>
+            <tr>
+              <td>Flag a short-form name matching neither party of the record</td>
+              <td class="num">4</td>
+              <td>40% precision — and the false alarms were cases where <em>lookup</em> landed
+                on the wrong record, not where the brief erred.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="margin-top:24px">
+        About 105 of the remaining misses sit behind measured rejections rather than unbuilt
+        work. Further recall on this corpus needs publisher-quality text in place of scanned
+        OCR — not a cleverer checker.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PIPELINE + RUN ===== -->
+<section class="dark pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*549</b>Pipeline</div></div>
+    <div class="body">
+      <div class="two">
+        <div>
+          <h2>Nine checks, in order</h2>
+          <p style="margin-top:18px;max-width:56ch">
+            A later stage may downgrade a verdict. Nothing can upgrade one. The order matters,
+            so it is numbered — unlike everything else on this page.
+          </p>
+          <div class="seq">
+            <div class="row"><span class="n">01</span><span class="t">Ingest</span><span class="d">PDF, DOCX, Markdown or text, preserving character offsets so every finding points at a real location.</span></div>
+            <div class="row"><span class="n">02</span><span class="t">Extract</span><span class="d">Citations, short forms and their antecedents, quotations, and the proposition each citation supports.</span></div>
+            <div class="row"><span class="n">03</span><span class="t">Resolve</span><span class="d">Against two public archives. Parallel reporters are followed when one archive lacks a series.</span></div>
+            <div class="row"><span class="n">04</span><span class="t">Verify</span><span class="d">Reporter, existence, case name, court, year, precedential status, quotation, attribution, pincite, proposition.</span></div>
+            <div class="row"><span class="n">05</span><span class="t">Report</span><span class="d">A Markdown evidence package and a JSON ledger. Every finding carries retrieved text and a timestamp.</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-bottom:4px">A run</h3>
+          <div class="term">
+            <div class="bar">verascite — motion-to-dismiss.docx</div>
+<pre><span class="tk">$</span> verascite motion-to-dismiss.docx --out ./audit
+
+<span class="tc">reading  </span> motion-to-dismiss.docx
+<span class="tc">extracted</span> 34 citations, 21 authorities
+<span class="tc">resolving</span> caselaw archives ......... done
+
+<span style="color:#D98A82">FLAGGED     2</span>  contradicted by a retrieved source
+<span style="color:#9FB4C3">UNVERIFIED  3</span>  absent from sources consulted
+<span class="tk">REVIEW      1</span>  needs a human read
+<span class="ts">VERIFIED   15</span>  confirmed on checked dimensions
+
+<span style="color:#D98A82">→</span> Bell Atlantic Corp. v. Twombly, 550 U.S. 544, 555
+  <span class="tc">quote:</span> altered quotation. opinion says
+  <span class="ts">'will not do'</span>, brief says <span style="color:#D98A82">'will not suffice'</span>
+
+<span style="color:#9FB4C3">→</span> Tinch v. Video Indus. Servs., 2019 WL 1396975
+  <span class="tc">not found in the sources consulted. This is</span>
+  <span class="tc">NOT a finding of fabrication — verify by hand.</span>
+
+ledger  ./audit/ledger.json
+report  ./audit/report.md</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== USE ===== -->
+<section id="use" class="pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*550</b>Use</div></div>
+    <div class="body">
+      <h2>Putting it to work</h2>
+      <div class="two" style="margin-top:30px">
+        <div>
+          <h3>Install and run</h3>
+          <pre class="code">pip install "verascite[all]"
+
+<span class="tc"># optional — adds recent-decision coverage</span>
+export COURTLISTENER_API_TOKEN="..."
+
+verascite brief.pdf --out ./audit</pre>
+          <p style="margin-top:14px;font-size:.93rem;color:var(--muted)">
+            Works with no credentials at all against the public-domain archive. Exit code is
+            <code>2</code> when anything is flagged, so it drops into CI unchanged. The token
+            never reaches reports, ledgers, cache keys, or logs — enforced by test.
+          </p>
+
+          <h3 style="margin-top:32px">In Python</h3>
+          <pre class="code"><span class="tk">from</span> pathlib <span class="tk">import</span> Path
+<span class="tk">from</span> verascite.run_audit <span class="tk">import</span> audit_document
+
+ledger = audit_document(
+    Path(<span class="ts">"brief.pdf"</span>),
+    out_dir=Path(<span class="ts">"./audit"</span>),
+    offline=<span class="ty">False</span>,
+)
+
+<span class="tk">for</span> entry <span class="tk">in</span> ledger:
+    <span class="tk">if</span> entry.overall.value == <span class="ts">"FLAGGED"</span>:
+        print(entry.citation.raw_text)</pre>
+        </div>
+        <div>
+          <h3>Inside an AI assistant</h3>
+          <p style="font-size:.95rem;color:var(--muted);margin-top:8px">
+            VeraScite is built to be called <em>by</em> an AI system as a verification step.
+            The contract is strict for one reason: a caller that renders absence as fabrication
+            turns a neutral observation into a false accusation.
+          </p>
+          <div class="note stop">
+            <p><b>Required of any caller</b></p>
+            <p>1. Never render <span class="chip k-abs">UNVERIFIED</span> as fabricated, fake, or hallucinated.<br>
+               2. Never upgrade a verdict.<br>
+               3. Quote the retrieved evidence, not the conclusion.<br>
+               4. Never present output as a certification or as legal advice.</p>
+          </div>
+          <pre class="code" style="margin-top:20px"><span class="tc"># tool definition</span>
+{
+  <span class="ts">"name"</span>: <span class="ty">"verify_citations"</span>,
+  <span class="ts">"description"</span>: <span class="ty">"Verify legal citations
+    against public caselaw archives. IMPORTANT:
+    UNVERIFIED means not found in the sources
+    consulted — it does NOT mean the citation
+    is fabricated."</span>,
+  <span class="ts">"input_schema"</span>: {
+    <span class="ts">"type"</span>: <span class="ty">"object"</span>,
+    <span class="ts">"properties"</span>: {
+      <span class="ts">"path"</span>:    {<span class="ts">"type"</span>: <span class="ty">"string"</span>},
+      <span class="ts">"offline"</span>: {<span class="ts">"type"</span>: <span class="ty">"boolean"</span>}
+    },
+    <span class="ts">"required"</span>: [<span class="ty">"path"</span>]
+  }
+}</pre>
+          <p style="margin-top:16px">
+            <a href="https://github.com/rakib-nyc/verascite/blob/main/docs/INTEGRATION.md"
+               style="font-weight:600">Full integration guide, with the system-prompt text →</a>
+          </p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:44px">Where it fits</h3>
+      <ul class="plain">
+        <li><b>Pre-filing review.</b> An associate runs it before the partner reads the draft. Flagged items arrive with the retrieved opinion text attached, so confirming a finding takes seconds rather than a database session.</li>
+        <li><b>Reviewing AI-assisted work product.</b> A research memo comes back perfectly formatted. VeraScite separates “this reporter series has never existed” from “this decision is too recent for free archives.”</li>
+        <li><b>Opposing filings.</b> Run the deterministic layer alone. Every verdict is reproducible from the same inputs, which matters if you intend to raise the issue with the court.</li>
+        <li><b>Continuous checking.</b> Fail the build on contradictions only. A gate that also failed on absence would break every time an author cited something recent.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== LIMITS ===== -->
+<section class="pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*551</b>Limits</div></div>
+    <div class="body">
+      <h2>What this does not do</h2>
+      <div class="note stop" style="margin-top:22px">
+        <p><b>This is experimental software from an independent research project.</b> It is
+          provided without warranty of any kind and does not constitute legal advice.
+          <b>Human verification by a licensed attorney is required before relying on any
+          output.</b></p>
+      </div>
+      <ul class="plain">
+        <li><b>It is not a citator.</b> It cannot tell you whether an authority is still good law, and does not detect overruled, reversed, vacated, abrogated, or superseded decisions.</li>
+        <li><b>It certifies nothing.</b> The output is an evidence package, not a clearance. Responsibility under Rule 11 and the applicable rules of professional conduct remains with the filing attorney.</li>
+        <li><b>Its coverage is bounded.</b> United States case law only. Statutes, regulations, legislative materials, and secondary sources route to manual review. Non-US authority is out of scope.</li>
+        <li><b>It can be wrong.</b> Precision is 86.4% on the benchmark above, which means roughly one finding in seven warrants a closer look before you act on it.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*552</b>Colophon</div></div>
+    <div class="body">
+      <div class="fg">
+        <div>
+          <div class="brand" style="color:#fff;margin-bottom:11px"><i style="color:#7FB0D4">*</i>VeraScite</div>
+          <p style="font-size:.89rem;max-width:36ch;margin:0;color:#8CA4B5">
+            Transparent, auditable legal citation verification. An independent research
+            project — not affiliated with or endorsed by any employer, institution, court, or
+            bar association.
+          </p>
+        </div>
+        <div><h4>Project</h4><ul>
+          <li><a href="https://github.com/rakib-nyc/verascite">Source</a></li>
+          <li><a href="https://github.com/rakib-nyc/verascite/blob/main/CHANGELOG.md">Changelog</a></li>
+          <li><a href="https://github.com/rakib-nyc/verascite/blob/main/LICENSE">License</a></li>
+          <li><a href="https://github.com/rakib-nyc/verascite/issues">Issues</a></li>
+        </ul></div>
+        <div><h4>Documentation</h4><ul>
+          <li><a href="https://github.com/rakib-nyc/verascite/blob/main/docs/INTEGRATION.md">Integration</a></li>
+          <li><a href="https://github.com/rakib-nyc/verascite/blob/main/docs/OUTPUT.md">Output reference</a></li>
+          <li><a href="https://github.com/rakib-nyc/verascite/tree/main/examples">Examples</a></li>
+          <li><a href="https://github.com/rakib-nyc/verascite/tree/main/evals">Evaluation protocols</a></li>
+        </ul></div>
+        <div><h4>Built on</h4><ul>
+          <li><a href="https://free.law/">Free Law Project</a></li>
+          <li><a href="https://www.courtlistener.com/">CourtListener</a></li>
+          <li><a href="https://case.law/">Caselaw Access Project</a></li>
+        </ul></div>
+      </div>
+      <div class="fb">
+        <div>Apache License 2.0 · © 2026 Muhammad Rakibul Islam</div>
+        <div><a href="mailto:rakib.islam@rutgers.edu">rakib.islam@rutgers.edu</a></div>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,233 @@
+[
+  {
+    "excerpt": 3,
+    "false_positive": "Keaton v. Keaton, 842 N.E.2d 816, 820 (Ind. 2006) (internal citations omitted)",
+    "why": {
+      "quote": "altered quotation. opinion says 'ones', brief says 'one s'; opinion says 'or', brief says 'and'; opinion says 'some one else', brief says 'another'; opinion says '(nothing)', brief says 'thereof'. The passage is otherwise present in the combined opinion by Boehm, so this is a changed quote rather than a different one (similarity 87%)."
+    }
+  },
+  {
+    "excerpt": 3,
+    "false_positive": "Serenity Springs v. LaPorte Cnty. Convention & Visitors Bureau , 986 N.E.2d 314, 327 (Ind. Ct. App. 2013)",
+    "why": {
+      "quote": "quoted language does not appear in the cited opinion: 'whether . . . the name or mark used by defendant has previously come to denote and identify plaintiff\u2019s goods.'. Searched 3 text version(s) of 1 sub-opinion(s), at least one of them the complete opinion; closest match 49%."
+    }
+  },
+  {
+    "excerpt": 4,
+    "false_positive": "M. Miranda v. Arizona 384 U.S. 436",
+    "why": {
+      "quote": "quoted language does not appear in the cited opinion: 'Where a restricted tribunal exceeds its jurisdiction, its decision amounts to nothing and does not create the necessity for an appeal.'. Searched 9 text version(s) of 4 sub-opinion(s), at least one of them the complete opinion; closest match 44%."
+    }
+  },
+  {
+    "excerpt": 11,
+    "false_positive": "Giebeler v. M & B Associates, 343 F.3d 1143, 1147 (9th Cir. 2003)",
+    "why": {
+      "quote": "altered quotation. opinion says 'that', brief says '(nothing)'; opinion says 'plaintiffs', brief says 'plaintiff s'. The passage is otherwise present in the majority opinion by Berzon, so this is a changed quote rather than a different one (similarity 99%)."
+    }
+  },
+  {
+    "excerpt": 13,
+    "false_positive": "Forsyth County v. Nationalist Movement , 505 U.S. 123, 133 (1992)",
+    "why": {
+      "quote": "altered quotation. opinion says 'such', brief says '(nothing)'; opinion says '(nothing)', brief says 'official'. The passage is otherwise present in the majority opinion by Blackmun, so this is a changed quote rather than a different one (similarity 97%)."
+    }
+  },
+  {
+    "excerpt": 13,
+    "false_positive": "Chrissy F. v. Miss. Dep't of Pub. Welfare, 925 F.2d 844, 849 (5th Cir. 1991)",
+    "why": {
+      "quote": "altered quotation. opinion says '(nothing)', brief says '1983'. The passage is otherwise present in the combined opinion by Rubin, so this is a changed quote rather than a different one (similarity 99%)."
+    }
+  },
+  {
+    "excerpt": 24,
+    "false_positive": "Ultramercial, LLC v. Hulu, LLC , 657 F.3d 1323, 1327 (Fed. Cir. 2011) (vacated on other grounds)",
+    "why": {
+      "quote": "quoted language does not appear in the cited opinion: 'mindful that a patent on the abstract idea of searching and processing containerized data which lacks a specific inventive concept to limit its scope poses a re'. Searched 3 text version(s) of 1 sub-opinion(s), at least one of them the complete opinion; closest match 46%."
+    }
+  },
+  {
+    "excerpt": 25,
+    "false_positive": "254 Va. at 138",
+    "why": {
+      "quote": "altered quotation. opinion says 'reject', brief says 'dismiss'; opinion says 'defy', brief says 'contradict'. The passage is otherwise present in the majority opinion by Koontz, so this is a changed quote rather than a different one (similarity 92%)."
+    }
+  },
+  {
+    "excerpt": 25,
+    "false_positive": "In  Deshotel v Wal-Mart Louisiana L.L.C. , 850 F.3d 742, 747 (5th Cir. 2017)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Deshotel v. Wal-Mart Louisiana L.L.C.', but 850 F.3d 742 is 'Amanda Riggio v. Wal-Mart Stores, Incorporated' (normalized overlap 0.33)."
+    }
+  },
+  {
+    "excerpt": 32,
+    "false_positive": "U.S. v. Stevens , 559 US 460, 468, 473",
+    "why": {
+      "quote_source": "the quoted language appears in the dissent by Alito, not in the opinion of the court, and the citation gives no signal that it is a separate writing. It does not carry the weight the citation claims for it."
+    }
+  },
+  {
+    "excerpt": 35,
+    "false_positive": "Cell Site Data , 724 F.3d 600 (5th Cir. 2013)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Cell Site Data', but 724 F.3d 600 is 'In re the United States' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 38,
+    "false_positive": "Market Synergy Grp., Inc. v. DOL, 885 F.3d 676, 683 (10th Cir. 2018)",
+    "why": {
+      "quote": "quoted language does not appear in the cited opinion: 'sensitive and weighty interests of national security and foreign affairs,'. Searched 3 text version(s) of 1 sub-opinion(s), at least one of them the complete opinion; closest match 49%."
+    }
+  },
+  {
+    "excerpt": 41,
+    "false_positive": "80 Fed. Reg. at 64,545, 64,590",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 44,
+    "false_positive": "Roberts, 239 F.3d at 112",
+    "why": {
+      "quote": "quoted language does not appear in the cited opinion: '[P]rimarily because of the history of the discovery of contraband and weapons hidden in the vagina of women who arrive in the Superior Court Cellblock from the '. Searched 4 text version(s) of 1 sub-opinion(s), at least one of them the complete opinion; closest match 39%."
+    }
+  },
+  {
+    "excerpt": 49,
+    "false_positive": "United States v. Henry , 673 F.3d 285, 291 (4th Cir. 2012)",
+    "why": {
+      "quote": "altered quotation. opinion says 'acts', brief says 'acted'; opinion says 'when it fails', brief says 'failed'; opinion says 'when it relies', brief says 'relied'; opinion says '(nothing)', brief says 'or legal premises'. The passage is otherwise present in the combined opinion by Keenan, so this is a changed quote rather than a different one (similarity 93%)."
+    }
+  },
+  {
+    "excerpt": 50,
+    "false_positive": "Portland Cement Ass\u2019n v. Ruckelshaus , 486 F.2d 375, 391 (D.C. Cir. 1973)",
+    "why": {
+      "quote": "quoted language does not appear in the cited opinion: 'the least common denominator'. Searched 4 text version(s) of 1 sub-opinion(s), at least one of them the complete opinion; closest match 0%."
+    }
+  },
+  {
+    "excerpt": 50,
+    "false_positive": "Nat\u2019l Lime Ass\u2019n v. EPA, 627 F.2d 416, 431-34",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'EPA', but 627 F.2d 416 is 'National Lime Association v. Environmental Protection Agency and Douglas M. Costle, Administrator of Environmental Protection Agency' (normalized overlap 0.00)."
+    }
+  },
+  {
+    "excerpt": 53,
+    "false_positive": "Allied Trades, AFL-CIO v. Brown, 656 F.2d 564, 567 (10th Cir. 1981)",
+    "why": {
+      "case_name": "case name does not match the authority at this citation. The document cites 'Allied Trades, AFL-CIO v. Brown', but 656 F.2d 564 is 'Carpet, Linoleum & Resilient Tile Layers, Local Union No. 419 v. Brown' (normalized overlap 0.20)."
+    }
+  },
+  {
+    "excerpt": 55,
+    "false_positive": "62 Fed. Reg. at 39,069",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 55,
+    "false_positive": "62 Fed. Reg. at 39,069",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 60,
+    "false_positive": "M.S. v. Wermers, 557 F.2d 170, 176 (8th Cir. 1977)",
+    "why": {
+      "quote": "altered quotation. opinion says '(nothing)', brief says 'to'; opinion says 'her', brief says 'it'; opinion says 'her', brief says 'its'; opinion says 'to her parents', brief says '(nothing)'; opinion says 'privacy', brief says 'substantive'; opinion says 'she', brief says 'it'. The passage is otherwise present in the majority opinion by Webster, so this is a changed quote rather than a different one (similarity 82%)."
+    }
+  },
+  {
+    "excerpt": 61,
+    "false_positive": "Bank of New York v. First Millennium, Inc. , 607 F.3d 905, 921 (2d Cir. 2010)",
+    "why": {
+      "quote": "altered quotation. opinion says 'see auction co', brief says '(nothing)'. The passage is otherwise present in the combined opinion by Lynch, so this is a changed quote rather than a different one (similarity 99%)."
+    }
+  },
+  {
+    "excerpt": 61,
+    "false_positive": "Homeland Stores, Inc. v. Resolution Trust Corp. , 17 F.3d 1269, 1274 (10th Cir.1994)",
+    "why": {
+      "quote": "altered quotation. opinion says 'then', brief says '(nothing)'; opinion says 'in', brief says '(nothing)'. The passage is otherwise present in the combined opinion by Tacha, so this is a changed quote rather than a different one (similarity 97%)."
+    }
+  },
+  {
+    "excerpt": 61,
+    "false_positive": "Rosa v. Resolution Trust Corp., 938 F.2d 383, 394 (3d Cir. 1991)",
+    "why": {
+      "quote": "altered quotation. opinion says 'the plan', brief says '(nothing)'; opinion says '(nothing)', brief says 'of 1821 d 13 d'; opinion says 'the claims procedure', brief says '(nothing)'. The passage is otherwise present in the majority opinion by Seitz, so this is a changed quote rather than a different one (similarity 91%)."
+    }
+  },
+  {
+    "excerpt": 63,
+    "false_positive": "Grp.   Rubin v. The Islamic Republic of Iran , 637 F.3d 783, 790 (7th Cir. 2011)",
+    "why": {
+      "quote": "altered quotation. opinion says 'the', brief says '(nothing)'. The passage is otherwise present in the combined opinion by Sykes, so this is a changed quote rather than a different one (similarity 99%)."
+    }
+  },
+  {
+    "excerpt": 63,
+    "false_positive": "Congo , 455 F.3d 575, 584 (5th Cir. 2006)",
+    "why": {
+      "quote": "altered quotation. opinion says '(nothing)', brief says '1609 of'; opinion says 'see byrd', brief says '(nothing)'. The passage is otherwise present in the combined opinion, so this is a changed quote rather than a different one (similarity 97%)."
+    }
+  },
+  {
+    "excerpt": 64,
+    "false_positive": "Dep\u2019t of Justice v. Tax Analysts, 492 U.S. 136",
+    "why": {
+      "quote": "altered quotation. opinion says 'requester', brief says 'requestor'. The passage is otherwise present in the majority opinion by Marshall, so this is a changed quote rather than a different one (similarity 99%)."
+    }
+  },
+  {
+    "excerpt": 64,
+    "false_positive": "Rossotti, 326 F.3d at 1312 (citation omitted)",
+    "why": {
+      "quote": "altered quotation. opinion says 'amended', brief says 'revised'; opinion says 'liberally construed', brief says 'generously interpreted'; opinion says 'noncommercial', brief says 'non commercial'; opinion says 'mcclellan', brief says '(nothing)'. The passage is otherwise present in the combined opinion by Tatel, so this is a changed quote rather than a different one (similarity 87%)."
+    }
+  },
+  {
+    "excerpt": 66,
+    "false_positive": "Wyoming v. USDA , 661 F.3d 1209, 1226-27 (10th Cir. 2011) (citation omitted)",
+    "why": {
+      "quote": "altered quotation. opinion says 'we review', brief says 'under the apa this court reviews'; opinion says 'forest guardians 641 f 3d at 428', brief says '(nothing)'; opinion says 'we', brief says 'the court'; opinion says '(nothing)', brief says 'law'. The passage is otherwise present in the combined opinion by Holmes, so this is a changed quote rather than a different one (similarity 85%)."
+    }
+  },
+  {
+    "excerpt": 72,
+    "false_positive": "Determination, 79 Fed. Reg. at 23,102 (J.A.257)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 72,
+    "false_positive": "Determination, 79 Fed. Reg. at 23,102 (J.A.257)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 72,
+    "false_positive": "Determination , 79 Fed. Reg. at 23,121 (J.A.276)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  },
+  {
+    "excerpt": 72,
+    "false_positive": "79 Fed. Reg. at 23,121 (J.A.276)",
+    "why": {
+      "reporter_valid": "reporter abbreviation 'Fed. Reg.' does not appear in reporters-db, which catalogues every reporter recognized in American law (1,342 editions and 2,282 variant abbreviations). No such reporter exists."
+    }
+  }
+]

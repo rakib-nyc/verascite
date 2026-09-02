@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-09-01T19:26:06Z",
+  "protocol": "evals/lephantomcite/PREREGISTRATION.md",
+  "thresholds_version": "1",
+  "thresholds": {
+    "version": "1",
+    "quote_material_alteration_floor": 0.75,
+    "quote_near_miss_floor": 0.6,
+    "quote_min_chars": 24,
+    "quote_max_attribution_gap": 140,
+    "name_pass_threshold": 0.75,
+    "name_review_threshold": 0.34,
+    "min_complete_opinion_chars": 1500,
+    "requests_per_minute": 5,
+    "citations_per_minute": 60,
+    "negative_result_ttl_days": 7
+  },
+  "layer_under_test": "deterministic only (no model-assisted checks)",
+  "quotes_checked": false,
+  "offline": false,
+  "excerpts_scored": 387,
+  "excerpts_excluded": 3,
+  "excerpts_failed_on_api_error": 0,
+  "counts": {
+    "tp": 56,
+    "fp": 71,
+    "fn": 256
+  },
+  "precision": 0.4409,
+  "recall": 0.1795,
+  "f1": 0.2551,
+  "false_positive_rate_on_absent_negatives": 0.0,
+  "absent_negatives_subset_size": 101,
+  "absent_negatives_flagged": 0,
+  "per_category_recall": {
+    "non_existent_citation": {
+      "gold": 32,
+      "detected": 10,
+      "recall": 0.3125
+    },
+    "case_name_mismatch": {
+      "gold": 63,
+      "detected": 47,
+      "recall": 0.746
+    },
+    "wrong_pincite": {
+      "gold": 53,
+      "detected": 1,
+      "recall": 0.0189
+    },
+    "misquote": {
+      "gold": 42,
+      "detected": 0,
+      "recall": 0.0
+    },
+    "content_misrepresentation": {
+      "gold": 131,
+      "detected": 2,
+      "recall": 0.0153
+    }
+  },
+  "verdict_distribution": {
+    "REVIEW": 1151,
+    "VERIFIED": 305,
+    "FLAGGED": 135,
+    "UNVERIFIED": 173
+  },
+  "wall_clock_seconds": 6.0,
+  "requests": 1,
+  "cache_only": false,
+  "citations_not_looked_up": 0
+}
