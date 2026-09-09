@@ -430,10 +430,15 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 
       <div class="axiom" style="margin-top:34px;background:#0F2E45;border-left-color:#7FB0D4;border-color:#1B3348">
         <p class="big" style="color:#fff">Which backend you choose changes the result, and the effect is large.</p>
-        <p class="sm" style="color:#9FB4C3">The figures on this page come from the reader used in
-        the evaluation, not from whatever you configure. A small local model scores materially
-        worse. The harness to measure your own is in the repository, and it is the same one
-        that produced these numbers.</p>
+        <p class="sm" style="color:#9FB4C3">Measured on the same samples, a small 4&#8239;B local
+        model reached <b style="color:#fff">5.6% recall against 82.7%</b> for the reader used in
+        the evaluation. It answers; almost every answer is low&#8209;confidence and reaches you as
+        &ldquo;a human should look at this.&rdquo;</p>
+        <p class="sm" style="color:#9FB4C3">The part worth keeping: under a weak reader the tool
+        degrades toward <b style="color:#fff">silence, not toward false accusation</b> &mdash; one
+        false positive in 35, and the span interlock caught a further one the model was about to
+        make. A small local model is a privacy floor, not a capability floor. Measure your own;
+        the harness that produced these numbers ships with the tool.</p>
       </div>
     </div>
   </div>

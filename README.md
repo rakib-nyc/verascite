@@ -86,10 +86,17 @@ Every verdict a model produced is marked in the report, alongside the backend, t
 whether text left the machine, what the run cost, and a plain statement that a reading is not
 reproducible. **`--deterministic-only` remains the default**; no model runs unless asked for.
 
-> **Backend choice changes results, and the effect is large.** The measured figures below
-> come from the reader used in the evaluation, not from whatever backend you configure. A
-> small local model scores materially worse. Measure your own backend with
-> [`evals/backends/`](evals/backends/) before relying on it.
+> **Backend choice changes results, and the effect is far larger than "materially".**
+> Measured on the same samples, a small 4B local model scored **5.6% recall against the
+> 82.7% of the reader used in the evaluation** — it answers, but almost every answer is
+> low-confidence and therefore reaches you as "a human should look at this."
+> [`evals/backends/RESULTS.md`](evals/backends/RESULTS.md) has the numbers.
+>
+> The part worth keeping: **under a weak reader the tool degrades toward silence, not
+> toward false accusation** — one false positive in 35, and the verbatim span interlock
+> caught a further false accusation the weak model was about to make. Treat a small local
+> model as a *privacy* floor, not a capability floor. Measure your own backend before
+> relying on it; the harness that produced those numbers is in the repository.
 
 ### A verification record, shaped to the obligation
 

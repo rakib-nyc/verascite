@@ -57,6 +57,13 @@ with provenance pinned by hash.
 
 ### Measured
 
+- **Backend choice dominates the model layer's results.** On the same samples a small
+  4B local model reached **5.6% recall against the 82.7%** of the reader used in the
+  original evaluation. Under a weak reader the tool degrades toward silence rather than
+  toward false accusation: one false positive in 35, and the verbatim span interlock
+  rejected a further reading that would have been a false accusation on a clean citation.
+  See `evals/backends/RESULTS.md`. The published 88.5% / 82.7% figures are a property of
+  that reader on that sample, not of the tool.
 - **Statutory subsection checking**, verified against the official structural
   text of title 42 at release point 119-103: real subsections confirmed,
   fabricated ones reported absent, including both canary cases on § 1983.
