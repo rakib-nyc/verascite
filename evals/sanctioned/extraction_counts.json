@@ -1,0 +1,14 @@
+{
+  "snapshot": "hallucinations-2026-09-09.csv",
+  "rows": 2035,
+  "rows_alleged": 10,
+  "rows_with_fabricated_case_law": 1586,
+  "rows_dropped_alleged": 10,
+  "segments": 3077,
+  "segments_with_citation": 619,
+  "records_yielding": 345,
+  "raw_citations": 672,
+  "duplicates": 12,
+  "unique_citations": 633,
+  "negative_controls": 27
+}

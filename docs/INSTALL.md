@@ -64,7 +64,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 git clone https://github.com/rakib-nyc/verascite.git
 cd verascite
 pip install -e ".[all,dev]"
-pytest -q          # 295 tests, no network, no credentials needed
+pytest -q          # 431 tests, no network, no credentials needed
 ```
 
 ---

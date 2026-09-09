@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VeraScite — Legal Citation Verification That Never Guesses</title>
-<meta name="description" content="Open-source legal citation verification. Detect fabricated, misattributed, and misrepresented case citations in briefs and AI-generated legal writing, with evidence for every finding. Apache 2.0.">
-<meta name="keywords" content="legal citation verification, AI hallucination detection, fabricated case citations, cite checking, legal brief validation, Rule 11, caselaw verification, CourtListener, Caselaw Access Project, legal tech, litigation technology, citation checker, open source legaltech">
+<meta name="description" content="Open-source legal citation verification for lawyers. Detect fabricated, misattributed, and misrepresented case citations, and fabricated statutory subsections, in briefs and AI-generated legal writing. Produces a dated verification record for Rule 11 and standing-order compliance. Runs entirely offline. Apache 2.0.">
+<meta name="keywords" content="legal citation verification, AI hallucination detection, fabricated case citations, cite checking, legal brief validation, Rule 11, standing order AI certification, attorney verification record, caselaw verification, statutory citation checker, US Code subsection verification, CFR citation check, CourtListener, Caselaw Access Project, legal tech, litigation technology, citation checker, local LLM legal, offline citation verification, open source legaltech">
 <meta name="author" content="Muhammad Rakibul Islam">
 <link rel="canonical" href="https://rakib-nyc.github.io/verascite/">
 <meta property="og:type" content="website">
@@ -23,7 +23,7 @@
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"VeraScite",
 "applicationCategory":"DeveloperApplication","operatingSystem":"Cross-platform",
 "description":"Open-source legal citation verification. Detects fabricated, misattributed, and misrepresented case citations in legal briefs and AI-generated legal writing.",
-"softwareVersion":"0.1.0","license":"https://www.apache.org/licenses/LICENSE-2.0",
+"softwareVersion":"0.2.0","license":"https://www.apache.org/licenses/LICENSE-2.0",
 "author":{"@type":"Person","name":"Muhammad Rakibul Islam","email":"rakib.islam@rutgers.edu"},
 "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
 "codeRepository":"https://github.com/rakib-nyc/verascite","programmingLanguage":"Python"}
@@ -244,8 +244,11 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
   <div class="nl">
     <a href="#failure">Failure modes</a>
     <a href="#verdicts">Verdicts</a>
+    <a href="#reading">Reading</a>
+    <a href="#record">Record</a>
     <a href="#results">Results</a>
     <a href="#rejected">What we rejected</a>
+    <a href="#external">Validation</a>
     <a href="#use">Use</a>
     <a class="gh" href="https://github.com/rakib-nyc/verascite">GitHub</a>
   </div>
@@ -257,7 +260,7 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== HERO ===== -->
 <section class="hero">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*544</b>VeraScite 0.1.0</div></div>
+    <div class="rail"><div class="mark"><b>*544</b>VeraScite 0.2.0</div></div>
     <div class="body">
       <div class="kicker">Independent research &nbsp;/&nbsp; Apache 2.0 &nbsp;/&nbsp; not legal advice</div>
       <h1>A citation is an address. Verification means going there.</h1>
@@ -376,10 +379,118 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
   </div>
 </section>
 
-<!-- ===== RESULTS ===== -->
+<!-- ===== NEW IN 0.2.0: THE HALF THAT WAS UNREACHABLE ===== -->
+<section id="reading" class="dark pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*547</b>Reading</div></div>
+    <div class="body">
+      <h2>The half of the tool users could not reach</h2>
+      <p class="lede">
+        Deciding whether an opinion actually supports the proposition it was cited for
+        requires reading the opinion. That layer existed, was tested, and was unreachable
+        from the installed command line. Every user got the deterministic half &mdash;
+        37.3&nbsp;F1 instead of roughly 70 &mdash; and content misrepresentation, the
+        largest single class of citation defect, was <b>0% detectable</b>.
+      </p>
+      <p class="lede" style="margin-top:18px">It now runs from a flag, against a backend you choose.</p>
+
+      <div class="term">
+        <pre><span class="tk">$</span> verascite brief.docx --out ./audit \
+    <span class="ty">--model local</span> --model-name YOUR-MODEL
+
+<span class="tc">reading  </span> 21 citations against their opinions
+<span class="tc">         </span> local backend, nothing left this machine</pre>
+      </div>
+
+      <div class="two" style="margin-top:34px">
+        <div>
+          <h3>Nothing leaves the machine, and that is enforced</h3>
+          <p><code class="mono">--model local</code> refuses any endpoint that is not a
+          loopback address. For a lawyer holding privileged material, the guarantee that no
+          citation, proposition, or opinion text leaves the machine cannot be a sentence in
+          a manual. It is a check in the code, and a test that fails if it is removed.</p>
+          <p>Three backends: a loopback endpoint, any hosted endpoint speaking the
+          chat&#8209;completions JSON interface, or a plain subprocess reading a prompt on
+          stdin. No vendor SDK, no vendor's option table baked in.</p>
+        </div>
+        <div>
+          <h3>A reading is labelled as a reading</h3>
+          <p>The deterministic layer is reproducible by construction. A model is not. So
+          every verdict a model touched is marked in the report, next to the backend, the
+          model, whether text left the machine, what the run cost, and a plain statement
+          that a different model may read differently.</p>
+          <p><code class="mono">--deterministic-only</code> remains the default. Nothing
+          reads unless you ask it to.</p>
+          <p>And because nobody reviews one brief at a time,
+          <code class="mono">--batch</code> takes a matter folder and returns one
+          consolidated report, ordered most&#8209;severe&#8209;first. A file that cannot be
+          read is named as <b>unexamined</b>, never as clean.</p>
+        </div>
+      </div>
+
+      <div class="axiom" style="margin-top:34px;background:#0F2E45;border-left-color:#7FB0D4;border-color:#1B3348">
+        <p class="big" style="color:#fff">Which backend you choose changes the result, and the effect is large.</p>
+        <p class="sm" style="color:#9FB4C3">The figures on this page come from the reader used in
+        the evaluation, not from whatever you configure. A small local model scores materially
+        worse. The harness to measure your own is in the repository, and it is the same one
+        that produced these numbers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== RECORD + STATUTES ===== -->
+<section id="record" class="pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*548</b>Record</div></div>
+    <div class="body">
+      <h2>The artifact a standing order actually contemplates</h2>
+      <p class="lede">
+        113 active standing orders now govern AI use in filings. The requirement they have
+        converged on is not disclosure. It is <b>certification that a licensed attorney
+        independently verified every citation</b> &mdash; and sanctions attach to the failure
+        to verify, not to the use of a drafting tool.
+      </p>
+
+      <div class="two" style="margin-top:34px">
+        <div>
+          <h3>A record of inquiry, not a clearance</h3>
+          <p>Every run writes <code class="mono">verification&#8209;record.md</code>. It binds
+          itself to a SHA&#8209;256 of the exact file reviewed, so it cannot be re&#8209;attached
+          to a later draft. It states the tool version and the threshold set. It lists every
+          citation with the sources consulted for it and when they were retrieved.</p>
+          <p>Then it enumerates <b>what was not examined &mdash; good&#8209;law status first,
+          and before the results</b>, because a list of confirmations read without its caveats
+          is a misleading record.</p>
+          <p>The attorney's attestation block is left blank. It has to be: a record that
+          arrived pre&#8209;filled would be a certification this tool has no standing to make.</p>
+        </div>
+        <div>
+          <h3>Statutes, and the subsection that was never there</h3>
+          <p>Statutory citations used to be out of scope entirely &mdash; seen, counted, set
+          aside. They are now checked against free federal sources that need no credential,
+          including the official structural text of the US Code.</p>
+          <p>Which makes one particular finding possible:</p>
+          <div class="term">
+            <pre><span style="color:#D98A82">→</span> 42 U.S.C. § 1983(a)(2)   <span style="color:#D98A82">FLAGGED</span>
+  <span class="tc">Section 1983 is present in the official</span>
+  <span class="tc">structural text and does not contain the</span>
+  <span class="tc">subsection the citation names.</span>
+  <span class="tc">Release point Online@119-103.</span></pre>
+          </div>
+          <p style="margin-top:14px">Section 1983 has no subsections at all. A fabricated
+          subsection of a real statute is close to invisible to a human reviewer, because
+          everything before the parenthesis is correct.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MEASURED ===== -->
 <section id="results" class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*547</b>Measured</div></div>
+    <div class="rail"><div class="mark"><b>*549</b>Measured</div></div>
     <div class="body">
       <h2>What it catches, and what it misses</h2>
       <p class="lede">
@@ -425,8 +536,8 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
           </div>
           <ul class="plain">
             <li><b>0 of 101</b> — false alarms on citations absent from every consulted source. The rule, measured.</li>
-            <li><b>295 tests</b> — network blocked at the socket layer, so no credential can reach a test.</li>
-            <li><b>Misquotation is 0%</b> and pincite recall is 13.2%. Both are stated because a tool that hides its blind spots is worse than one that names them.</li>
+            <li><b>431 tests</b> — network blocked at the socket layer, so no credential can reach a test.</li>
+            <li><b>Misquotation is 0%</b> against a fixed threshold and pincite recall is 13.2%. Both are stated because a tool that hides its blind spots is worse than one that names them. The calibrated replacement for the first is two sections down.</li>
           </ul>
         </div>
       </div>
@@ -437,7 +548,7 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== REJECTED ===== -->
 <section id="rejected" class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*548</b>Rejected</div></div>
+    <div class="rail"><div class="mark"><b>*550</b>Rejected</div></div>
     <div class="body">
       <h2>Three checks that would have raised recall, and were not shipped</h2>
       <p class="lede">
@@ -457,12 +568,12 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
                 <b>128 false accusations for 22 findings. 14.9% precision.</b></td>
             </tr>
             <tr>
-              <td>Flag a quotation that does not match the source text</td>
+              <td>Flag a quotation against a <em>fixed</em> threshold</td>
               <td class="num">42</td>
               <td>A <em>correct</em> quotation matches its source at a median of 0.929, not
                 1.00, because both the brief and the archive are scanned text. Misquotes sit
                 at 0.719. Every threshold was swept:
-                <b>precision peaks at 17.2%.</b></td>
+                <b>precision peaks at 17.2%.</b> Still rejected &mdash; but see below.</td>
             </tr>
             <tr>
               <td>Flag a short-form name matching neither party of the record</td>
@@ -475,9 +586,89 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
       </div>
       <p class="lede" style="margin-top:24px">
         About 105 of the remaining misses sit behind measured rejections rather than unbuilt
-        work. Further recall on this corpus needs publisher-quality text in place of scanned
-        OCR — not a cleverer checker.
+        work.
       </p>
+
+      <h3 style="margin-top:44px">One of them was revisited, and the recorded reason was wrong</h3>
+      <p class="lede">
+        The note on file said misquote detection failed because the archive text was scanned,
+        and that publisher-quality text would fix it. Re-running the sweep on 236 opinion
+        texts the archive itself marks as <em>not</em> scanned settled that, and not in the
+        expected direction: <b>the scanned and non-scanned subsets behave almost
+        identically.</b> The archive's scanning flag is not the variable, and the planned fix
+        would not have worked.
+      </p>
+      <p class="lede" style="margin-top:16px">
+        What decides the outcome is how far <em>this document</em> and the archive disagree
+        — which no fixed threshold can know, and which the document itself carries the
+        evidence to measure. If nine of a brief's quotations match their sources at 0.999 and
+        the tenth matches at 0.977, the tenth is anomalous <b>for this document</b>.
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Misquote detection</th><th class="num">Fixed threshold</th><th class="num">Calibrated to the document</th></tr></thead>
+          <tbody>
+            <tr><td>Precision</td><td class="num">17.2%</td><td class="num"><b>80–91%</b></td></tr>
+            <tr><td>Recall</td><td class="num">—</td><td class="num">35–56%</td></tr>
+            <tr><td>Documents too noisy to judge</td><td class="num">judged anyway</td><td class="num"><b>declined</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">
+        <p>It ships as <span class="chip k-rev">REVIEW</span> and never as a finding. The
+        evidence is synthetic disagreement rather than real scanned briefs, and an anomaly in
+        agreement is not contradiction. The honest sentence is <b>“this quotation matches its
+        source less well than the rest of yours do — read it”</b>, which is a prompt to look,
+        not an accusation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EXTERNAL VALIDATION ===== -->
+<section id="external" class="pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*551</b>Validation</div></div>
+    <div class="body">
+      <h2>Citations courts actually sanctioned</h2>
+      <p class="lede">
+        Every figure above comes from one benchmark of <em>injected</em> defects. External
+        validity was unproven. So: 633 citations that courts adjudicated to be fabricated,
+        drawn from a public database of sanctions decisions, provenance pinned by hash.
+        The labels are judicial findings, not an annotator's judgment.
+      </p>
+
+      <div class="two" style="margin-top:34px">
+        <div>
+          <h3>The headline is incomplete, and says so</h3>
+          <p>Existence resolution needs an archive credential. None was present, so only the
+          credential-free checks ran: <b>8.9% detection on 484 scored citations</b>, all of it
+          from reporter validity.</p>
+          <p><b>That is not this tool's recall on that corpus.</b> It is the recall of the
+          checks that need no lookup. The protocol in the repository states exactly what to
+          run to finish it, and the expectation on record stands: expect the number to drop.</p>
+        </div>
+        <div>
+          <h3>The result that matters more</h3>
+          <p>149 of the 633 are vendor-only identifiers &mdash; <code class="mono">2019 WL
+          1396975</code> and its kind, real decisions no free archive holds.</p>
+          <p><b>Every one was reported <span class="chip k-abs">UNVERIFIED</span>. None was
+          flagged</b> &mdash; on citations that really were fabricated, with a court order to
+          prove it.</p>
+          <p>That is the governing rule holding under the hardest pressure there is. It also
+          sets a ceiling worth stating plainly: <b>23.5% of the defective citations in that
+          corpus are ones this tool will never flag, by design.</b> A checker that flagged
+          them would score better here and be a worse tool.</p>
+        </div>
+      </div>
+
+      <div class="note">
+        <p>This corpus is built from court <b>orders</b>, not from the <b>filings</b> that
+        contained the citations. It answers “given a citation a court adjudicated to be
+        fabricated, is it flagged?” &mdash; not “does this catch bad citations in a real
+        brief.” Those are different questions, and the limitations are listed in full
+        <em>before</em> any result in the repository.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -485,11 +676,11 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== PIPELINE + RUN ===== -->
 <section class="dark pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*549</b>Pipeline</div></div>
+    <div class="rail"><div class="mark"><b>*552</b>Pipeline</div></div>
     <div class="body">
       <div class="two">
         <div>
-          <h2>Nine checks, in order</h2>
+          <h2>The checks, in order</h2>
           <p style="margin-top:18px;max-width:56ch">
             A later stage may downgrade a verdict. Nothing can upgrade one. The order matters,
             so it is numbered — unlike everything else on this page.
@@ -537,7 +728,7 @@ report  ./audit/report.md</pre>
 <!-- ===== USE ===== -->
 <section id="use" class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*550</b>Use</div></div>
+    <div class="rail"><div class="mark"><b>*553</b>Use</div></div>
     <div class="body">
       <h2>Putting it to work</h2>
       <div class="two" style="margin-top:30px">
@@ -638,7 +829,7 @@ ledger = audit_document(
 <!-- ===== LIMITS ===== -->
 <section class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*551</b>Limits</div></div>
+    <div class="rail"><div class="mark"><b>*554</b>Limits</div></div>
     <div class="body">
       <h2>What this does not do</h2>
       <div class="note stop" style="margin-top:22px">
@@ -650,7 +841,10 @@ ledger = audit_document(
       <ul class="plain">
         <li><b>It is not a citator.</b> It cannot tell you whether an authority is still good law, and does not detect overruled, reversed, vacated, abrogated, or superseded decisions.</li>
         <li><b>It certifies nothing.</b> The output is an evidence package, not a clearance. Responsibility under Rule 11 and the applicable rules of professional conduct remains with the filing attorney.</li>
-        <li><b>Its coverage is bounded.</b> United States case law only. Statutes, regulations, legislative materials, and secondary sources route to manual review. Non-US authority is out of scope.</li>
+        <li><b>Its coverage is bounded.</b> United States authority only. Case law, statutes and regulations are covered; legislative materials and secondary sources route to manual review. Non-US authority is out of scope.</li>
+        <li><b>Statutory currency is not checked.</b> A statutory answer describes the text currently in force. A provision amended or repealed since the events in issue is still reported as existing.</li>
+        <li><b>Vendor-only identifiers can never be flagged.</b> Measured against real sanctioned filings, that is 23.5% of defective citations. This is by design and will not change.</li>
+        <li><b>Grounded reading is not reproducible</b>, and the result depends materially on which model does the reading.</li>
         <li><b>It can be wrong.</b> Precision is 86.4% on the benchmark above, which means roughly one finding in seven warrants a closer look before you act on it.</li>
       </ul>
     </div>
@@ -661,7 +855,7 @@ ledger = audit_document(
 
 <footer>
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*552</b>Colophon</div></div>
+    <div class="rail"><div class="mark"><b>*555</b>Colophon</div></div>
     <div class="body">
       <div class="fg">
         <div>

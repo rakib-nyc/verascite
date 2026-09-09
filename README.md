@@ -5,7 +5,7 @@
 [![tests](https://github.com/rakib-nyc/verascite/actions/workflows/ci.yml/badge.svg)](https://github.com/rakib-nyc/verascite/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](CHANGELOG.md)
 
 > **Independent research project.** Experimental software, released for research and
 > evaluation. **No warranty of any kind. Every result requires human verification by a
@@ -33,6 +33,11 @@ caselaw archives, and checks it along independent dimensions — reporter validi
 case name, court, year, precedential status, quotation accuracy, pincite, and whether the
 authority supports the proposition it is cited for.
 
+As of **v0.2.0** it also checks **statutes and regulations** — including whether a cited
+*subsection* of a real statute actually exists — and writes a **verification record**: a
+dated, hash-bound account of what was checked against what, in the shape the standing orders
+now governing AI-assisted filings actually contemplate.
+
 It produces an **evidence package**: for each finding, what was checked, what source was
 retrieved, when it was retrieved, and the text that supports the conclusion.
 
@@ -53,6 +58,71 @@ right.
 
 Every check that could fire on absence has been measured and, where it could not clear that
 bar, **deliberately not built** — see [Measured and rejected](#measured-and-rejected).
+
+---
+
+## New in v0.2.0
+
+### The model-assisted layer now runs from the command line
+
+Through v0.1.0 the installed command line had no model in it. That was the right call for
+the deterministic core and the wrong outcome for users: the deterministic layer alone is
+37.3% F1, and content misrepresentation — the largest defect class — is **0% detectable**
+without a model reading the opinion.
+
+```bash
+# Nothing leaves your machine. Point at any local endpoint.
+verascite brief.docx --out ./audit --model local --model-name YOUR-MODEL
+
+# Or a hosted endpoint speaking the chat-completions JSON interface.
+verascite brief.docx --out ./audit --model api   --model-base-url https://your-endpoint/v1 --model-name YOUR-MODEL
+```
+
+`--model local` refuses any endpoint that is not a loopback address. The guarantee that no
+citation, proposition, or opinion text leaves the machine is **enforced in code, not
+promised in documentation** — which is what a lawyer holding privileged material needs.
+
+Every verdict a model produced is marked in the report, alongside the backend, the model,
+whether text left the machine, what the run cost, and a plain statement that a reading is not
+reproducible. **`--deterministic-only` remains the default**; no model runs unless asked for.
+
+> **Backend choice changes results, and the effect is large.** The measured figures below
+> come from the reader used in the evaluation, not from whatever backend you configure. A
+> small local model scores materially worse. Measure your own backend with
+> [`evals/backends/`](evals/backends/) before relying on it.
+
+### A verification record, shaped to the obligation
+
+113 active standing orders now require certification that a licensed attorney independently
+verified every citation. Sanctions attach to the failure to verify, not to the use of AI.
+
+`verification-record.md` is written on every run. It binds itself to a SHA-256 of the exact
+file reviewed, states the tool version and threshold set, lists every citation with the
+sources consulted for it and when they were retrieved, and enumerates **what was not
+examined — good-law status first, and before the results.** The attorney's attestation block
+is deliberately blank.
+
+**VeraScite certifies nothing.** The record is evidence of inquiry, and it says so in its
+first lines.
+
+### Statutes and regulations
+
+Previously out of scope entirely. Now parsed and checked against free federal sources that
+need **no credential**: the government link service, the eCFR versions endpoint, and the
+official structural text of the US Code.
+
+The check this enables is the one worth having:
+
+```
+42 U.S.C. § 1983(a)(2)  →  FLAGGED
+    Section 1983 of title 42 is present in the official structural text
+    and does not contain the subsection the citation names.
+    Checked against release point Online@119-103.
+```
+
+Section 1983 has no subsections at all. A fabricated subsection of a real statute is
+damaging and nearly invisible to a human reviewer, because everything before the parenthesis
+is correct.
 
 ---
 
@@ -117,13 +187,71 @@ that collapses at the real base rate.**
 | Approach | Available gain | Why it was rejected |
 |---|---:|---|
 | Flag a pincite when the proposition is absent from the cited page | 46 defects | Balanced sample: 77% recall / 77% specificity. At the true base rate (29 wrong vs 562 sound pincites) this yields **128 false accusations for 22 findings — 14.9% precision.** Absence promoted to a finding. |
-| Flag a misquotation when text does not match the source | 42 defects | A **correct** quotation matches its source at median **0.929**, not 1.00, because both the brief and the archive are OCR output. Injected misquotes sit at 0.719. Every threshold was swept: precision peaks at **17.2%**. |
+| Flag a misquotation against a **fixed** threshold | 42 defects | A **correct** quotation matches its source at median **0.929**, not 1.00, because both the brief and the archive are OCR output. Every threshold was swept: precision peaks at **17.2%**. **Still rejected.** But see below — calibrating to the document instead of to a constant changes the answer. |
 | Flag a short-form name that matches neither party | 4 defects | 40% precision — and the false alarms were cases where *lookup* landed wrong, not where the brief erred. |
 
 Roughly **105 of the remaining misses sit behind measured rejections rather than unbuilt
-work.** Further recall on this corpus needs a better text source — publisher-quality text
-instead of scanned OCR — not a cleverer checker. Full protocols in
-[`evals/`](evals/).
+work.** Full protocols in [`evals/`](evals/).
+
+### One rejection was revisited, and the reason it failed was not the one on record
+
+v0.1.0 recorded that misquote detection failed because the archive text was scanned, and
+that publisher-quality text should fix it. **That turned out to be wrong**, and the
+measurement is in [`evals/misquote/RESULTS.md`](evals/misquote/RESULTS.md).
+
+Re-running the sweep on 236 opinion texts the archive itself marks as *not* scanned, the
+scanned and non-scanned subsets behave almost identically at every noise level. **The
+archive's scanning flag is not the variable.** The planned fix — gating the check on
+`extracted_by_ocr == False` — would not have worked.
+
+What decides the outcome is how far *this document* and the archive disagree, and a fixed
+threshold cannot know that. A document, however, carries the evidence needed to measure it.
+If nine of a brief's quotations match their sources at 0.999 and the tenth matches at 0.977,
+the tenth is anomalous **for this document** — and the comparison is between quotations that
+passed through the same author, the same word processor, and the same extraction.
+
+| | Fixed threshold | Calibrated to the document |
+|---|---:|---:|
+| Precision | 17.2% | **80–91%** |
+| Recall | — | 35–56% |
+
+Where the document is too noisy to calibrate, the check **declines** — 28 of 29 documents at
+the highest disagreement level, rather than guessing.
+
+It ships as `REVIEW` and never as a finding, for two reasons. The evidence is synthetic
+disagreement rather than real scanned briefs. And an anomaly in agreement is not
+contradiction: the honest statement is *"this quotation matches its source less well than
+the rest of yours do — read it."*
+
+---
+
+## External validation: citations courts actually sanctioned
+
+Every figure above comes from one benchmark of *injected* defects. v0.2.0 adds a corpus
+where the labels are **judicial findings**: 633 citations that courts adjudicated to be
+fabricated, extracted from a public database of sanctions decisions
+([CC BY 4.0](evals/sanctioned/CORPUS.md)) with provenance pinned by hash.
+
+**The headline is incomplete and says so.** Existence resolution needs a CourtListener
+credential; none was present, so only the credential-free checks ran — 8.9% detection on 484
+scored citations, all of it from reporter validity. That is **not** this tool's recall on
+that corpus. [`evals/sanctioned/PROTOCOL.md`](evals/sanctioned/PROTOCOL.md) says exactly what
+to run to finish it.
+
+**The result that matters more than the headline:** 149 of the 633 are vendor-only
+identifiers like `2019 WL 1396975`. Every one was reported `UNVERIFIED`. **None was
+flagged** — on citations that really were fabricated, with a court order to prove it.
+
+That is the governing rule holding under the hardest pressure there is. It also sets a
+ceiling worth stating plainly: **23.5% of the defective citations in that corpus are ones
+this tool will never flag, by design.** A checker that flagged them would score better and
+be a worse tool.
+
+> This corpus is built from court **orders**, not from the **filings** that contained the
+> citations. It answers *"given a citation a court adjudicated to be fabricated, is it
+> flagged?"* — not *"does this catch bad citations in a real brief?"* Those are different
+> questions. The limitations are listed in full before any result in
+> [`CORPUS.md`](evals/sanctioned/CORPUS.md).
 
 ---
 
@@ -251,7 +379,49 @@ verascite brief.md --out ./audit --no-quotes
 
 # Resume an interrupted run from the existing ledger
 verascite brief.pdf --out ./audit --resume
+
+# Read each authority against the proposition it is cited for, entirely locally
+verascite brief.docx --out ./audit --model local --model-name YOUR-MODEL
+
+# Check subsections of cited statutes against the official structural text
+# (downloads ~18MB per US Code title, cached)
+verascite brief.docx --out ./audit --download-code-titles
+
+# Review a whole matter folder, with one consolidated report
+verascite ./matter-2026-114 --batch --out ./audit
 ```
+
+### Batch review
+
+`--batch` treats the path as a directory and reviews every `.pdf`, `.docx`, `.md` and
+`.txt` under it, writing each document's own evidence package plus a consolidated
+`batch-report.md` ordered most-severe-first.
+
+Runs are **sequential and share the cache** — deliberately. The archives' rate limits are
+shared across the batch too, so running four documents at once would spend the budget four
+times as fast and finish no sooner. Two briefs citing the same authority cost one lookup
+between them.
+
+A document that cannot be read is recorded as **unexamined**, named in the summary, and the
+batch continues. It is never reported as clean.
+
+### Grounded reading options
+
+| Flag | Effect |
+|---|---|
+| `--model` | `local`, `api`, `command`, or `none` (default) |
+| `--model-name` | Model identifier your backend expects |
+| `--model-base-url` | Endpoint; required for `api`, loopback default for `local` |
+| `--model-param KEY=VALUE` | Extra request-body key, repeatable. JSON values are sent as JSON |
+| `--model-max-reads N` | Stop after N opinions — reading is the expensive part of a run |
+| `--model-cost-per-1k-input` / `--output` | Your rates, for the cost line in the report |
+
+No price table for any service ships with this tool. A stale hardcoded price is worse than
+no price, so cost is reported only from rates you supply.
+
+If your model emits a reasoning scratchpad, it may spend the whole reply budget on it and
+return nothing. Suppress it with whatever key your backend uses, for example
+`--model-param think=false`, or raise `--model-max-tokens`.
 
 ### Python API
 
@@ -432,14 +602,25 @@ VeraScite does **not**:
 - Certify any filing, or discharge any professional obligation.
 - Act as a citator. **It cannot tell you whether an authority is still good law** — it does
   not detect overruled, reversed, vacated, abrogated, or superseded decisions.
-- Cover statutes, regulations, legislative materials, or secondary sources. These are routed
-  to manual review.
+- Cover legislative materials or secondary sources. These are routed to manual review.
+  Statutes and regulations *are* covered as of v0.2.0, but **their currency is not**: the
+  answer describes the text currently in force, so a provision amended or repealed since the
+  events in issue is still reported as existing.
 - Cover non-US authority.
 - Guarantee that an `UNVERIFIED` citation is fake, or that a `VERIFIED` one is apt.
 
-Known measured weaknesses, stated plainly: misquotation detection is **0%** on OCR-derived
-text and pincite recall is **13.2%** in the deterministic layer. Both are documented above
-with the measurements that produced them.
+Known measured weaknesses, stated plainly:
+
+- **Pincite recall is 13.2%** in the deterministic layer.
+- **Misquote detection is 0%** against a fixed threshold. The calibrated check added in
+  v0.2.0 reaches 80–91% precision on synthetic evidence, ships as `REVIEW` only, and
+  **declines entirely** on a document too noisy to calibrate.
+- **Regulatory subsection checking is weaker than statutory**, and says so in every result:
+  regulation text is flat, so the paragraph hierarchy is inferred from printed designators
+  rather than read from structure. It never reports a paragraph as absent.
+- **Grounded reading is not reproducible**, and results depend materially on the backend.
+- **Vendor-only identifiers can never be flagged.** Measured on real sanctioned filings, that
+  is 23.5% of defective citations. This is by design and is not going to change.
 
 ---
 
@@ -462,7 +643,7 @@ with the measurements that produced them.
   author  = {Islam, Muhammad Rakibul},
   title   = {VeraScite: Transparent, Auditable Legal Citation Verification},
   year    = {2026},
-  version = {0.1.0},
+  version = {0.2.0},
   url     = {https://github.com/rakib-nyc/verascite},
   license = {Apache-2.0}
 }

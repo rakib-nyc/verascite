@@ -1,0 +1,32 @@
+[
+  {
+    "url": "https://www.damiencharlotin.com/hallucinations/hallucinations/download.csv",
+    "fetched": "2026-09-09",
+    "file": "hallucinations-2026-09-09.csv",
+    "sha256": "f4c94d4e80ca5182404c200286aff46e6fa4809be9b466661a1c7a1f1a0f9168",
+    "bytes": 1931833,
+    "rows": 2035,
+    "fields": [
+      "Case Name",
+      "Court",
+      "State(s)",
+      "Date",
+      "Party(ies)",
+      "AI Tool",
+      "Hallucination Items",
+      "Outcome",
+      "Monetary Penalty",
+      "Professional Sanction",
+      "Alleged",
+      "Vendor Disputed",
+      "Vendor Disputed Explanation",
+      "Pointer",
+      "Source",
+      "Details",
+      "Legal Field Primary",
+      "Legal Field Secondary"
+    ],
+    "attribution": "AI Hallucination Cases Database, Damien Charlotin, https://www.damiencharlotin.com/hallucinations/",
+    "license": "CC BY 4.0"
+  }
+]

@@ -14,3 +14,9 @@ audit/
 audit-*/
 evals/**/eval.jsonl
 evals/**/*.jsonl
+# The sanctioned-citation corpus is redistributed as our own extraction plus a
+# manifest pinning the source by hash -- not as a mirror of somebody else's
+# database. The raw snapshot stays local; fetch_corpus.py reproduces it.
+!evals/sanctioned/fabricated_citations.jsonl
+!evals/sanctioned/negative_controls.jsonl
+evals/sanctioned/raw/*.csv

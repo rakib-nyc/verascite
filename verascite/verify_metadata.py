@@ -282,11 +282,18 @@ def _blocking_check(entry: LedgerEntry) -> Optional[str]:
 def _check_statute_parts(entry: LedgerEntry) -> None:
     """Record what was parsed out of a statutory citation.
 
-    Verification against GovInfo and eCFR is M5's verify_statute.py. Until
-    then this states plainly what is known and what is not, rather than
-    borrowing dimensions built for cases.
+    The fallback, not the check. ``verify_statute`` verifies the citation
+    against the published text and runs first; where it has already decided a
+    dimension this leaves it alone, because saying "parsed as title 42,
+    section 1983" over the top of "that subsection is not in the official
+    text" would replace a finding with a restatement of the input.
+
+    It still runs when the statute stage did not -- offline, or with
+    ``--no-statutes`` -- so a statutory citation is never simply silent.
     """
     citation = entry.citation
+    if "statute_parts" in entry.checks and "statute_currency" in entry.checks:
+        return
     parts = []
     if citation.title:
         parts.append(f"title {citation.title}")
@@ -294,7 +301,7 @@ def _check_statute_parts(entry: LedgerEntry) -> None:
         parts.append(citation.reporter)
     if citation.section:
         parts.append(f"section {citation.section}")
-    entry.set_check(
+    entry.try_set_check(
         "statute_parts",
         CheckResult(
             Verdict.PASS if parts else Verdict.NOT_CHECKABLE,
@@ -303,7 +310,7 @@ def _check_statute_parts(entry: LedgerEntry) -> None:
             sources_consulted=["eyecite"],
         ),
     )
-    entry.set_check(
+    entry.try_set_check(
         "statute_currency",
         CheckResult(
             Verdict.OUT_OF_SCOPE,

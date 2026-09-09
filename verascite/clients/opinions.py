@@ -690,3 +690,25 @@ def _first_reporter_page(cluster: dict) -> Optional[int]:
         if page.isdigit():
             return int(page)
     return None
+
+
+def page_texts_for(opinion: OpinionText) -> dict[str, str]:
+    """Star page label -> the text printed on that page.
+
+    Reconstructed from the pagination markers the archive embeds. Text before
+    the first marker is dropped: it belongs to the page *preceding* the first
+    one named, and guessing which page that is would put words on a page they
+    were not printed on -- which is the one thing a page reconstruction must
+    never do. A label appearing more than once has its runs concatenated,
+    because a page interrupted by a footnote block is still one page.
+    """
+    if not opinion.page_marks or not opinion.text:
+        return {}
+    marks = sorted(opinion.page_marks, key=lambda m: m.offset)
+    pages: dict[str, str] = {}
+    for index, mark in enumerate(marks):
+        end = marks[index + 1].offset if index + 1 < len(marks) else len(opinion.text)
+        chunk = opinion.text[mark.offset:end]
+        if chunk:
+            pages[mark.label] = (pages.get(mark.label, "") + chunk)
+    return pages

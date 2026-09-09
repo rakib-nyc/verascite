@@ -180,6 +180,9 @@ DIMENSIONS = (
     "pincite",
     "quote",
     "quote_source",
+    #: Calibrated against the document's own agreement with its sources rather
+    #: than against a constant. Only ever REVIEW; see verify_agreement.py.
+    "quote_agreement",
     "proposition",
     "treatment",
     "precedential",

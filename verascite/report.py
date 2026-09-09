@@ -61,6 +61,7 @@ DIMENSION_LABELS = {
     "pincite": "Pincite",
     "quote": "Quotation",
     "quote_source": "Quotation attribution",
+    "quote_agreement": "Quotation agreement",
     "proposition": "Proposition support",
     "treatment": "Later treatment",
     "precedential": "Precedential status",
@@ -175,6 +176,16 @@ def _citation_heading(entry: LedgerEntry) -> str:
     return flatten_for_output(entry.citation.raw_text, limit=110) or "(unnamed citation)"
 
 
+#: Set on any check the grounded reading produced. Mirrors
+#: verify_proposition.PROPOSITION_SOURCE; duplicated rather than imported so
+#: the renderer does not pull in the reading stage.
+MODEL_SOURCE = "model_grounded_reading"
+
+
+def _is_model_derived(check: CheckResult) -> bool:
+    return MODEL_SOURCE in (check.sources_consulted or ())
+
+
 def _render_entry(entry: LedgerEntry) -> list[str]:
     lines = [f"#### {_citation_heading(entry)}", ""]
     lines.append(f"`{entry.citation_id}` &middot; {_location(entry)} &middot; "
@@ -209,10 +220,19 @@ def _render_entry(entry: LedgerEntry) -> list[str]:
         lines.append("|---|---|---|")
         for name, check in shown:
             detail = flatten_for_output(check.evidence or check.reason or "", limit=600)
-            lines.append(
-                f"| {DIMENSION_LABELS.get(name, name)} | `{check.verdict.value}` | {detail} |"
-            )
+            label = DIMENSION_LABELS.get(name, name)
+            if _is_model_derived(check):
+                label += " &dagger;"
+            lines.append(f"| {label} | `{check.verdict.value}` | {detail} |")
         lines.append("")
+        if any(_is_model_derived(c) for _, c in shown):
+            lines.append(
+                "&dagger; *Reached by a model reading the retrieved opinion, not by "
+                "the reproducible layer. It is bounded -- a finding required the "
+                "model to quote the opinion verbatim -- but it is a reading, and a "
+                "different model may read differently.*"
+            )
+            lines.append("")
 
     if consequential:
         by_cause: dict[str, list[str]] = {}
@@ -228,7 +248,7 @@ def _render_entry(entry: LedgerEntry) -> list[str]:
         lines.append("")
 
     passed = [
-        DIMENSION_LABELS.get(name, name)
+        DIMENSION_LABELS.get(name, name) + (" &dagger;" if _is_model_derived(check) else "")
         for name, check in entry.checks.items()
         if check.verdict is Verdict.PASS
     ]
@@ -252,6 +272,72 @@ def _render_entry(entry: LedgerEntry) -> list[str]:
         stamp = f" (retrieved {resolution.retrieved_at})" if resolution.retrieved_at else ""
         lines.append(f"*Matched to:* [{resolution.case_name or 'record'}]({resolution.url}){stamp}")
         lines.append("")
+    return lines
+
+
+def _reading_section(reading: dict) -> list[str]:
+    """Provenance for the one stage that is not reproducible.
+
+    Printed in full whenever a model read anything, because a reader who cannot
+    tell which verdicts came from a reading cannot weigh them. The cost lines
+    are here rather than in a log because reading opinions is the expensive
+    part of a run and the person paying should see what it cost.
+    """
+    lines = ["**Grounded reading**", ""]
+    lines.append(
+        f"- Backend `{reading.get('backend')}`, model `{reading.get('model')}`"
+        + (f", endpoint `{reading.get('endpoint')}`" if reading.get("endpoint") else "")
+    )
+    if reading.get("leaves_this_machine") is False:
+        lines.append(
+            "- **No citation, proposition, or opinion text was sent off this "
+            "machine for reading.**"
+        )
+    else:
+        lines.append(
+            "- Citation text, the proposition asserted, and retrieved opinion text "
+            "were sent to the endpoint named above."
+        )
+    lines.append(
+        f"- {_plural(reading.get('read', 0), 'citation')} read of "
+        f"{reading.get('candidates', 0)} eligible"
+    )
+    if reading.get("deferred_by_cap"):
+        lines.append(
+            f"- **{reading['deferred_by_cap']} were not read** because the run hit "
+            "its reading limit. They are unexamined, not disputed."
+        )
+    if reading.get("opinion_text_unavailable"):
+        lines.append(
+            f"- {reading['opinion_text_unavailable']} could not be read because no "
+            "opinion text was retrievable."
+        )
+    if reading.get("failures"):
+        lines.append(
+            f"- {_plural(reading['failures'], 'reading')} failed at the backend. "
+            "A failure is recorded, never converted into a verdict."
+        )
+    latency = reading.get("total_latency_s")
+    if latency:
+        lines.append(
+            f"- {latency}s spent reading, {reading.get('mean_latency_s')}s per "
+            f"citation on average, slowest {reading.get('slowest_read_s')}s"
+        )
+    if "input_tokens" in reading:
+        lines.append(
+            f"- {reading['input_tokens']:,} input and {reading['output_tokens']:,} "
+            "output tokens"
+        )
+    elif reading.get("tokens"):
+        lines.append(f"- Token use: {reading['tokens']}")
+    if reading.get("estimated_cost"):
+        lines.append(
+            f"- Estimated cost {reading['estimated_cost']}, at the rates supplied "
+            "on the command line"
+        )
+    lines.append("")
+    lines.append(f"> {reading.get('caveat', '')}")
+    lines.append("")
     return lines
 
 
@@ -288,22 +374,49 @@ def _scope_section(ledger: Ledger) -> list[str]:
         lines.append(f"**No citation lookup was performed.** {lookup}")
         lines.append("")
 
+    reading = meta.get("grounded_reading") or {}
+
     lines.append("**What was not checked**")
     lines.append("")
     not_checked = [
         "Whether an authority remains good law. This tool is not a citator; it "
         "does not detect overruled, reversed, vacated, abrogated, or superseded "
         "decisions.",
-        "Whether a cited authority actually supports the proposition it is cited "
-        "for. That check is not yet implemented.",
-        "Pincite accuracy beyond the page a quotation was found on.",
-        "Statutes, regulations, and secondary sources, which are routed to "
+    ]
+    if not reading:
+        not_checked.append(
+            "Whether a cited authority actually supports the proposition it is "
+            "cited for. **No model was configured for this run, so no citation's "
+            "substance was examined.** Content misrepresentation -- a real case "
+            "cited for something it does not hold -- cannot be detected without "
+            "one, and it is the largest single class of citation defect."
+        )
+    not_checked.append("Pincite accuracy beyond the page a quotation was found on.")
+    statutes = meta.get("statutes") or {}
+    if statutes:
+        not_checked.append(
+            "Whether a cited statute or regulation read the same way on the date "
+            "it matters. The statutory answers in this report describe the text "
+            "currently in force; a provision amended or repealed since the events "
+            "in issue is still reported as existing."
+        )
+        if statutes.get("subsection_note"):
+            not_checked.append(statutes["subsection_note"].capitalize() + ".")
+    else:
+        not_checked.append(
+            "Statutes and regulations, which were not checked in this run."
+        )
+    not_checked += [
+        "Legislative materials and secondary sources, which are routed to "
         "manual verification.",
         "Anything about non-US authority.",
     ]
     for item in not_checked:
         lines.append(f"- {item}")
     lines.append("")
+
+    if reading:
+        lines += _reading_section(reading)
 
     # Printed even when everything is zero. Silence here lets a reader assume
     # quotations were checked and cleared.
