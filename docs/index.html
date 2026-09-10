@@ -23,7 +23,7 @@
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"VeraScite",
 "applicationCategory":"DeveloperApplication","operatingSystem":"Cross-platform",
 "description":"Open-source legal citation verification. Detects fabricated, misattributed, and misrepresented case citations in legal briefs and AI-generated legal writing.",
-"softwareVersion":"0.2.0","license":"https://www.apache.org/licenses/LICENSE-2.0",
+"softwareVersion":"0.2.5","license":"https://www.apache.org/licenses/LICENSE-2.0",
 "author":{"@type":"Person","name":"Muhammad Rakibul Islam","email":"rakib.islam@rutgers.edu"},
 "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
 "codeRepository":"https://github.com/rakib-nyc/verascite","programmingLanguage":"Python"}
@@ -260,7 +260,7 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== HERO ===== -->
 <section class="hero">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*544</b>VeraScite 0.2.0</div></div>
+    <div class="rail"><div class="mark"><b>*544</b>VeraScite 0.2.5</div></div>
     <div class="body">
       <div class="kicker">Independent research &nbsp;/&nbsp; Apache 2.0 &nbsp;/&nbsp; not legal advice</div>
       <h1>A citation is an address. Verification means going there.</h1>
@@ -586,6 +586,17 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
               <td>40% precision — and the false alarms were cases where <em>lookup</em> landed
                 on the wrong record, not where the brief erred.</td>
             </tr>
+            <tr>
+              <td>A bounded &ldquo;is this still good law&rdquo; signal</td>
+              <td class="num">&mdash;</td>
+              <td>Re-measured with an archive credential. Proximity search is <b>66&times;
+                better</b> than the document-level version that was rejected before &mdash;
+                and still does not separate. <em>Roe</em> (overruled) returns 46 hits;
+                <em>Twombly</em> (good law) returns <b>45</b>. The query cannot tell
+                &ldquo;X overruled Y&rdquo; from &ldquo;Y overruled X&rdquo;, courts overrule
+                <em>objections</em>, and an old case&rsquo;s rate is diluted by decades of
+                citations predating the overruling.</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -637,21 +648,32 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
     <div class="body">
       <h2>Citations courts actually sanctioned</h2>
       <p class="lede">
-        Every figure above comes from one benchmark of <em>injected</em> defects. External
-        validity was unproven. So: 633 citations that courts adjudicated to be fabricated,
-        drawn from a public database of sanctions decisions, provenance pinned by hash.
-        The labels are judicial findings, not an annotator's judgment.
+        Every figure above comes from one benchmark of <em>injected</em> defects. So: 633
+        citations that courts adjudicated to be fabricated, drawn from a public database of
+        sanctions decisions, provenance pinned by hash. The labels are judicial findings,
+        not an annotator&rsquo;s judgment.
       </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>On 484 scored citations</th><th class="num">result</th></tr></thead>
+          <tbody>
+            <tr class="mine"><td>Flagged</td><td class="num"><b>239 &mdash; 49.4%</b></td></tr>
+            <tr><td>Vendor-only identifiers, all reported <code class="mono">UNVERIFIED</code></td><td class="num">149 / 149</td></tr>
+            <tr><td>Cost of the entire run</td><td class="num">4 requests</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <div class="two" style="margin-top:34px">
         <div>
-          <h3>The headline is incomplete, and says so</h3>
-          <p>Existence resolution needs an archive credential. None was present, so only the
-          credential-free checks ran: <b>8.9% detection on 484 scored citations</b>, all of it
-          from reporter validity.</p>
-          <p><b>That is not this tool's recall on that corpus.</b> It is the recall of the
-          checks that need no lookup. The protocol in the repository states exactly what to
-          run to finish it, and the expectation on record stands: expect the number to drop.</p>
+          <h3>49.4% is a floor, not recall</h3>
+          <p>The corpus labels a <em>record</em>, not always the citation extracted from it.
+          A narrative reading &ldquo;counsel cited X, which does not exist; the correct case
+          was Y&rdquo; can yield Y. Others are real cases carrying a fabricated
+          <em>quotation</em>, which no citation string can reveal.</p>
+          <p>Every kind of noise pushes the number down, never up. Measured rather than
+          asserted: excluding all 51 rows whose narrative discusses a correction moves it
+          only to 49.7%.</p>
         </div>
         <div>
           <h3>The result that matters more</h3>
@@ -660,19 +682,41 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
           <p><b>Every one was reported <span class="chip k-abs">UNVERIFIED</span>. None was
           flagged</b> &mdash; on citations that really were fabricated, with a court order to
           prove it.</p>
-          <p>That is the governing rule holding under the hardest pressure there is. It also
-          sets a ceiling worth stating plainly: <b>23.5% of the defective citations in that
-          corpus are ones this tool will never flag, by design.</b> A checker that flagged
-          them would score better here and be a worse tool.</p>
+          <p>That also sets a ceiling worth stating plainly: <b>23.5% of the defective
+          citations in that corpus are ones this tool will never flag, by design.</b> A
+          checker that flagged them would score better here and be a worse tool.</p>
         </div>
       </div>
 
+      <h3 style="margin-top:44px">What it found that the benchmark could not</h3>
+      <p class="lede">
+        Asking why 49 citations came back <span class="chip k-ok">VERIFIED</span> exposed a
+        real defect. The case-name matcher scored <code class="mono">State v. Pune</code>
+        against <code class="mono">State v. Ing</code> at <b>1.00</b>, and would confirm a
+        fabricated case name against any unrelated decision printed at the same page whenever
+        the two shared a generic party &mdash; <em>State v.</em>, <em>People v.</em>,
+        <em>Commonwealth v.</em>, <em>United States v.</em>, <em>In re</em>. That is an
+        enormous share of American case law.
+      </p>
+      <p class="lede" style="margin-top:16px">
+        The benchmark could not have found it. Its citations carry years and courts, which the
+        metadata stage uses to disambiguate; strip those, as a bare citation in a sanctions
+        order does, and the case name is doing all the work alone. It was a <b>recall</b>
+        defect rather than a false-accusation one &mdash; which is exactly why it survived, in
+        a codebase whose tests attack false accusation hardest.
+      </p>
+      <div class="note">
+        <p>Fixed and locked under test. The fix moved this corpus from 46.7% to <b>49.4%</b>,
+        with the vendor-only result unchanged at 149&nbsp;of&nbsp;149. <b>This is what
+        external validation is for</b>, and it is the most useful thing the corpus has
+        produced.</p>
+      </div>
       <div class="note">
         <p>This corpus is built from court <b>orders</b>, not from the <b>filings</b> that
-        contained the citations. It answers “given a citation a court adjudicated to be
-        fabricated, is it flagged?” &mdash; not “does this catch bad citations in a real
-        brief.” Those are different questions, and the limitations are listed in full
-        <em>before</em> any result in the repository.</p>
+        contained the citations. It answers &ldquo;given a citation a court adjudicated to be
+        fabricated, is it flagged?&rdquo; &mdash; not &ldquo;does this catch bad citations in
+        a real brief.&rdquo; Those are different questions, and the limitations are listed in
+        full <em>before</em> any result in the repository.</p>
       </div>
     </div>
   </div>

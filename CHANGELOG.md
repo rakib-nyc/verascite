@@ -4,6 +4,83 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] — 2026-09-09
+
+External validation completed, and it did what external validation is supposed to
+do: it found a defect the benchmark could not.
+
+### Fixed
+
+**The case-name matcher confirmed fabricated names against unrelated cases.**
+`name_similarity` scored `State v. Pune` against `State v. Ing` at **1.00**.
+`_overlap` normalises by the smaller set, making it a containment measure, and the
+distinctive-token filter drops tokens under four characters — so `{state, ing}`
+reduced to `{state}`, which is contained in `{state, pune}`. Any two captions
+sharing a generic party (`State v.`, `People v.`, `Commonwealth v.`,
+`United States v.`, `In re`) could confirm each other, and that is an enormous
+share of American case law. The archive's `case_name_short` field made it worse:
+it is frequently a bare abbreviation like `Com.`, which matched anything.
+
+Now, one rule applied before containment: if everything two names have in common
+is caption boilerplate, they agree on nothing that identifies a case, and the
+score is capped below the review threshold. Identical names short-circuit first,
+and shared-token matching stays fuzzy, so short forms (`Twombly`), misspellings
+(`Ziglar`/`Zigler`) and wholly generic identical names (`In re Doe`) are
+unaffected.
+
+This was a **recall** defect, not a false-accusation one — it reported `VERIFIED`
+where it should have reported a mismatch — which is why it survived: this
+project's tests attack false accusation hardest. Protocol and full verification
+table in `evals/names/V9_PROTOCOL.md`. No value in `config.py` changed; the
+regression corpus is unmoved.
+
+### Measured
+
+**P4 external validation, completed.** 484 scored citations from a corpus of 633
+that courts adjudicated to be fabricated. **239 flagged — 49.4%**, up from 8.9%
+when only credential-free checks could run. The entire corpus cost **four
+requests**, batched.
+
+**49.4% is a floor, not recall.** The corpus labels a record, not always the
+citation extracted from it: some rows carry the court's own correction, or a real
+case to which a fabricated quotation was attributed. All such noise pushes the
+figure down. Excluding every row whose narrative discusses a correction moves it
+only to 49.7%, so that kind of contamination is not the main explanation.
+
+**All 149 vendor-only identifiers reported `UNVERIFIED`, none flagged** — the
+governing rule holding on citations that really were fabricated. 23.5% of the
+defective citations in that corpus are permanently out of reach, by design.
+
+**The name fix moved the corpus from 46.7% to 49.4%** — 13 more citations
+correctly flagged, with the vendor-only result unchanged at 149/149.
+
+### Measured and rejected
+
+**A bounded negative-treatment signal, re-measured now a credential exists.** The
+cost objection is gone: proximity search answers "does overruling language sit
+next to this case's name" at one request per authority rather than two per citing
+opinion, and it is **66x better than the document-level version** rejected
+earlier (7.91% vs 0.12% median, against 1.8x separation before).
+
+It still does not separate. *Roe* (overruled) returns 46 proximity hits; *Twombly*
+(good law) returns **45**. Three verified causes: the query cannot tell "X
+overruled Y" from "Y overruled X" (5 of Twombly's 45 hits are *Twombly overruling
+Conley*); courts overrule *objections* and *motions*, a different sense of the
+word entirely; and an authority overruled after decades of good standing has its
+rate diluted by all the citations predating the overruling, so the metric is
+weakest on the cases that matter most.
+
+A shipped version would report "nothing found" for *Roe v. Wade* and "3 signals
+found" for *Twombly*. **Not shipped.** `verify_treatment.py` is unchanged.
+`evals/treatment/PROTOCOL.md` names four specific things to try next.
+
+### Notes
+
+- 468 tests, up from 447.
+- The published benchmark figures (83.3% / 24.0% / 37.3%) were produced with the
+  defective matcher and were **not** re-run for this release. They are therefore
+  conservative with respect to the fix.
+
 ## [0.2.0] — 2026-09-09
 
 The model-assisted layer becomes reachable from the command line, statutory and

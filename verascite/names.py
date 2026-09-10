@@ -209,6 +209,61 @@ def _overlap(left: frozenset[str], right: frozenset[str]) -> float:
     return min(matched / min(len(left), len(right)), 1.0)
 
 
+#: Party names that identify a *side* of a case without identifying the case.
+#: "State v. Ing" and "State v. Pune" share a party and are different cases;
+#: so do "Commonwealth v. Burton" and "Com v. Reid". Criminal and government
+#: captions are an enormous share of American case law, so a matcher that
+#: treats a shared generic party as a match will confirm a fabricated case
+#: name against whatever unrelated decision happens to sit at that page.
+#:
+#: Found by external validation, not by the benchmark: the benchmark's
+#: citations carry years and courts, which mask the failure. See
+#: evals/names/V9_PROTOCOL.md.
+GENERIC_PARTIES = frozenset({
+    "state", "states", "people", "commonwealth", "united", "us", "usa",
+    "government", "republic", "city", "county", "town", "township", "village",
+    "borough", "board", "commission", "committee", "department", "dept",
+    "director", "commissioner", "secretary", "administrator", "warden",
+    "sheriff", "attorney", "general", "district", "division", "bureau",
+    "agency", "authority", "office", "service", "services",
+    "doe", "roe", "unknown", "minor", "juvenile",
+    # Abbreviated captions. CourtListener's `case_name_short` is frequently a
+    # bare party abbreviation -- "Com.", "State", "In re" -- which is contained
+    # in thousands of unrelated captions and identifies none of them.
+    "com", "comm", "commw", "cmwlth", "cwlth", "st", "people's",
+})
+
+#: Ceiling applied when two names each name a specific party and the parties
+#: are different. Below NAME_REVIEW_THRESHOLD, so it reads as an affirmative
+#: mismatch rather than as a borderline one -- because it is one.
+GENERIC_ONLY_CEILING = 0.30
+
+
+def _distinctive(tokens: frozenset[str]) -> frozenset[str]:
+    """Tokens that identify *this* case rather than a side of many cases."""
+    return frozenset(t for t in tokens if t not in GENERIC_PARTIES)
+
+
+def _shared_tokens(left: frozenset[str], right: frozenset[str]) -> frozenset[str]:
+    """Tokens the two names have in common, allowing for misspelling.
+
+    Fuzzy, because refusing a match on "Ziglar"/"Zigler" would turn a spelling
+    difference into an accusation -- the error this whole module exists to
+    avoid.
+    """
+    shared = set(left & right)
+    for token in left - right:
+        if len(token) < _MIN_FUZZY_LEN:
+            continue
+        for other in right - left:
+            if len(other) < _MIN_FUZZY_LEN or abs(len(token) - len(other)) > 2:
+                continue
+            if difflib.SequenceMatcher(None, token, other).ratio() >= _SPELLING_RATIO:
+                shared.add(token)
+                break
+    return frozenset(shared)
+
+
 @lru_cache(maxsize=8192)
 def name_similarity(asserted: Optional[str], actual: Optional[str]) -> float:
     """How much two case names agree, from 0 to 1.
@@ -223,6 +278,23 @@ def name_similarity(asserted: Optional[str], actual: Optional[str]) -> float:
     right = _expand_against(actual, asserted)
     if not left or not right:
         return 0.0
+
+    if left == right:
+        return 1.0
+
+    # The rule that external validation forced. Whatever these two names have
+    # in common, if none of it identifies a *case* -- if it is all "State",
+    # "People", "Com." -- then they agree on caption boilerplate and nothing
+    # else. "State v. Ing" reduces to {state}, which is contained in
+    # {state, pune}, so containment alone would have every criminal caption in
+    # the reporter confirm every other. Measured on real sanctioned filings:
+    # see evals/names/V9_PROTOCOL.md.
+    if not _distinctive(_shared_tokens(left, right)):
+        return min(
+            GENERIC_ONLY_CEILING,
+            max(_overlap(left, right), _overlap(_distinctive(left), _distinctive(right))),
+        )
+
     if left <= right or right <= left:
         return 1.0
     distinctive_left = frozenset(t for t in left if len(t) >= 4) or left

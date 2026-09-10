@@ -5,7 +5,7 @@
 [![tests](https://github.com/rakib-nyc/verascite/actions/workflows/ci.yml/badge.svg)](https://github.com/rakib-nyc/verascite/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.5-blue.svg)](CHANGELOG.md)
 
 > **Independent research project.** Experimental software, released for research and
 > evaluation. **No warranty of any kind. Every result requires human verification by a
@@ -196,9 +196,15 @@ that collapses at the real base rate.**
 | Flag a pincite when the proposition is absent from the cited page | 46 defects | Balanced sample: 77% recall / 77% specificity. At the true base rate (29 wrong vs 562 sound pincites) this yields **128 false accusations for 22 findings — 14.9% precision.** Absence promoted to a finding. |
 | Flag a misquotation against a **fixed** threshold | 42 defects | A **correct** quotation matches its source at median **0.929**, not 1.00, because both the brief and the archive are OCR output. Every threshold was swept: precision peaks at **17.2%**. **Still rejected.** But see below — calibrating to the document instead of to a constant changes the answer. |
 | Flag a short-form name that matches neither party | 4 defects | 40% precision — and the false alarms were cases where *lookup* landed wrong, not where the brief erred. |
+| A bounded negative-treatment signal ("is this still good law?") | — | Re-measured in v0.2.5. Proximity search is **66× better** than the rejected document-level version, and still does not separate: *Roe* (overruled) returns 46 hits, *Twombly* (good law) returns **45**. Three verified causes — the query cannot tell "X overruled Y" from "Y overruled X"; courts overrule *objections*; and an old case's rate is diluted by decades of pre-overruling citations. [Protocol](evals/treatment/PROTOCOL.md). |
 
 Roughly **105 of the remaining misses sit behind measured rejections rather than unbuilt
 work.** Full protocols in [`evals/`](evals/).
+
+A shipped version of that last one would report "nothing found" for *Roe v. Wade* and
+"3 signals found" for *Twombly* — a confident wrong answer about whether a case is good law,
+which is the one thing this tool must never give. The protocol names four specific things to
+try next, none of them tested and none of them claimed to work.
 
 ### One rejection was revisited, and the reason it failed was not the one on record
 
@@ -234,31 +240,56 @@ the rest of yours do — read it."*
 
 ## External validation: citations courts actually sanctioned
 
-Every figure above comes from one benchmark of *injected* defects. v0.2.0 adds a corpus
+Every figure above comes from one benchmark of *injected* defects. v0.2.0 added a corpus
 where the labels are **judicial findings**: 633 citations that courts adjudicated to be
 fabricated, extracted from a public database of sanctions decisions
-([CC BY 4.0](evals/sanctioned/CORPUS.md)) with provenance pinned by hash.
+([CC BY 4.0](evals/sanctioned/CORPUS.md)) with provenance pinned by hash. v0.2.5 runs it.
 
-**The headline is incomplete and says so.** Existence resolution needs a CourtListener
-credential; none was present, so only the credential-free checks ran — 8.9% detection on 484
-scored citations, all of it from reporter validity. That is **not** this tool's recall on
-that corpus. [`evals/sanctioned/PROTOCOL.md`](evals/sanctioned/PROTOCOL.md) says exactly what
-to run to finish it.
+| | |
+|---:|---|
+| Scored (excluding 149 vendor-only, 32 unparsed) | 484 |
+| **Flagged** | **239 — 49.4%** |
+| Cost of the entire run | **4 requests** |
 
-**The result that matters more than the headline:** 149 of the 633 are vendor-only
-identifiers like `2019 WL 1396975`. Every one was reported `UNVERIFIED`. **None was
-flagged** — on citations that really were fabricated, with a court order to prove it.
+**49.4% is a floor, not recall.** The corpus labels a *record*, not always the citation
+extracted from it. A narrative reading *"counsel cited X, which does not exist; the correct
+case was Y"* can yield Y — `Iko v. Shreve, 535 F.3d 225` is real, and the fabrication in
+that record was `Iko v. Shreve, 122 F.3d 707`. Others are real cases carrying a fabricated
+*quotation*, which is not checkable from a citation string. Every kind of noise pushes the
+number down, never up. Measured rather than asserted: excluding all 51 rows whose narrative
+discusses a correction moves it only to 49.7%.
 
-That is the governing rule holding under the hardest pressure there is. It also sets a
-ceiling worth stating plainly: **23.5% of the defective citations in that corpus are ones
-this tool will never flag, by design.** A checker that flagged them would score better and
-be a worse tool.
+**The result that matters more:** 149 of the 633 are vendor-only identifiers like
+`2019 WL 1396975`. Every one was reported `UNVERIFIED`. **None was flagged** — on citations
+that really were fabricated, with a court order to prove it. That is the governing rule
+holding under the hardest pressure there is, and it sets a ceiling worth stating plainly:
+**23.5% of the defective citations in that corpus are ones this tool will never flag, by
+design.** A checker that flagged them would score better and be a worse tool.
 
-> This corpus is built from court **orders**, not from the **filings** that contained the
+### What it found that the benchmark could not
+
+Asking why 49 citations came back `VERIFIED` exposed a real defect. The case-name matcher
+scored `State v. Pune` against `State v. Ing` at **1.00**, and would confirm a fabricated
+case name against any unrelated decision printed at the same page whenever the two shared a
+generic party — `State v.`, `People v.`, `Commonwealth v.`, `United States v.`, `In re`.
+That is an enormous share of American case law.
+
+The benchmark could not have found it: its citations carry years and courts, which the
+metadata stage uses to disambiguate. Strip those, as a bare citation in a sanctions order
+does, and the case name is doing all the work alone.
+
+It was a **recall** defect, not a false-accusation one — it made the tool report `VERIFIED`
+where it should have reported a mismatch — which is why it survived: this project's tests
+attack false accusation hardest. Fixed, locked under test, and the fix moved the corpus from
+46.7% to 49.4%. Analysis in [`evals/names/V9_PROTOCOL.md`](evals/names/V9_PROTOCOL.md).
+
+**This is what external validation is for**, and it is the most useful thing the corpus has
+produced.
+
+> The corpus is built from court **orders**, not from the **filings** that contained the
 > citations. It answers *"given a citation a court adjudicated to be fabricated, is it
-> flagged?"* — not *"does this catch bad citations in a real brief?"* Those are different
-> questions. The limitations are listed in full before any result in
-> [`CORPUS.md`](evals/sanctioned/CORPUS.md).
+> flagged?"* — not *"does this catch bad citations in a real brief?"* The limitations are
+> listed in full before any result in [`CORPUS.md`](evals/sanctioned/CORPUS.md).
 
 ---
 
@@ -650,7 +681,7 @@ Known measured weaknesses, stated plainly:
   author  = {Islam, Muhammad Rakibul},
   title   = {VeraScite: Transparent, Auditable Legal Citation Verification},
   year    = {2026},
-  version = {0.2.0},
+  version = {0.2.5},
   url     = {https://github.com/rakib-nyc/verascite},
   license = {Apache-2.0}
 }
