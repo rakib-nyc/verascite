@@ -7,14 +7,22 @@
  * on roughly a tenth of the citations in any real brief, and every one of those
  * would be sound. So absence is grey, deliberately and everywhere.
  */
-.vs-mark { border-radius: 2px; padding: 0 1px; }
+/* A mark sets its own text colour as well as its background. The host page may
+ * be dark or light and its text colour is not ours to inherit -- on a dark page
+ * a light background with the page's light text renders the citation invisible,
+ * which is how this was found. Self-contained in both directions. */
+.vs-mark {
+  border-radius: 2px; padding: 0 2px;
+  color: #12222F !important;
+  -webkit-text-fill-color: #12222F;
+}
 .vs-noreporter,
-.vs-mismatch   { background: #FBECEA; box-shadow: inset 0 -2px 0 #A8271F; }
-.vs-yearoff    { background: #FFF6E9; box-shadow: inset 0 -2px 0 #C68B2B; }
-.vs-found      { background: #E8F1ED; box-shadow: inset 0 -2px 0 #1D5B41; }
-/* Absence: a dotted neutral rule. Present, but not an alarm. */
-.vs-absent, .vs-vendor { background: #EDF1F4; box-shadow: inset 0 -2px 0 #B6C0C8; }
-.vs-error  { background: #F3F4F5; }
+.vs-mismatch   { background: #FBD9D4; box-shadow: inset 0 -2px 0 #A8271F; }
+.vs-yearoff    { background: #FBEBCF; box-shadow: inset 0 -2px 0 #C68B2B; }
+.vs-found      { background: #D9EAE1; box-shadow: inset 0 -2px 0 #1D5B41; }
+/* Absence: neutral. Present, but never an alarm. */
+.vs-absent, .vs-vendor { background: #E2E7EB; box-shadow: inset 0 -2px 0 #97A3AC; }
+.vs-error  { background: #E8EAEB; }
 
 #verascite-panel {
   position: fixed; top: 16px; right: 16px; width: 380px; max-width: calc(100vw - 32px);
