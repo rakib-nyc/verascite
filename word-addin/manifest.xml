@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  VeraScite for Word.
+
+  The task pane is served from GitHub Pages over HTTPS, which is what Office
+  requires; there is no server of ours in between. Only citation strings leave
+  the machine, and only when the user presses the button.
+-->
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+           xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+           xsi:type="TaskPaneApp">
+  <Id>7b3f2c14-5a91-4d2e-9c68-1f0a3b6d84e5</Id>
+  <Version>0.3.0.0</Version>
+  <ProviderName>Muhammad Rakibul Islam</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="VeraScite"/>
+  <Description DefaultValue="Check the legal citations in this document against free public archives. Never reports a citation as fabricated for being absent from an archive."/>
+  <IconUrl DefaultValue="https://rakib-nyc.github.io/verascite/word/icon32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://rakib-nyc.github.io/verascite/word/icon128.png"/>
+  <SupportUrl DefaultValue="https://github.com/rakib-nyc/verascite"/>
+  <AppDomains>
+    <AppDomain>https://www.courtlistener.com</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Document"/>
+  </Hosts>
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="WordApi" MinVersion="1.1"/>
+    </Sets>
+  </Requirements>
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://rakib-nyc.github.io/verascite/word/taskpane.html"/>
+  </DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Document">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title"/>
+            <Description resid="GetStarted.Desc"/>
+            <LearnMoreUrl resid="GetStarted.Url"/>
+          </GetStarted>
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="VeraSciteGroup">
+                <Label resid="Group.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16"/>
+                  <bt:Image size="32" resid="Icon.32"/>
+                  <bt:Image size="80" resid="Icon.80"/>
+                </Icon>
+                <Control xsi:type="Button" id="VeraSciteButton">
+                  <Label resid="Button.Label"/>
+                  <Supertip>
+                    <Title resid="Button.Label"/>
+                    <Description resid="Button.Tip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16"/>
+                    <bt:Image size="32" resid="Icon.32"/>
+                    <bt:Image size="80" resid="Icon.80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>VeraScitePane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16" DefaultValue="https://rakib-nyc.github.io/verascite/word/icon32.png"/>
+        <bt:Image id="Icon.32" DefaultValue="https://rakib-nyc.github.io/verascite/word/icon32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="https://rakib-nyc.github.io/verascite/word/icon128.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://rakib-nyc.github.io/verascite/word/taskpane.html"/>
+        <bt:Url id="GetStarted.Url" DefaultValue="https://github.com/rakib-nyc/verascite/blob/main/word-addin/README.md"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="Group.Label" DefaultValue="VeraScite"/>
+        <bt:String id="Button.Label" DefaultValue="Check citations"/>
+        <bt:String id="GetStarted.Title" DefaultValue="VeraScite is ready."/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="Button.Tip" DefaultValue="Check every legal citation in this document against free public archives, and comment on the ones a source contradicts."/>
+        <bt:String id="GetStarted.Desc" DefaultValue="Open the Home tab and choose Check citations."/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

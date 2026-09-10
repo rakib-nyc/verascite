@@ -119,6 +119,19 @@ verascite my-motion.docx --out ./check --plain
 particular care in the direction that matters: *"**This does not mean it is fake.** Many real
 cases are not in free archives."*
 
+### A Word add-in, where briefs are actually written
+
+```bash
+mkdir -p ~/Library/Containers/com.microsoft.Word/Data/Documents/wef
+curl -o ~/Library/Containers/com.microsoft.Word/Data/Documents/wef/verascite.xml \
+  https://raw.githubusercontent.com/rakib-nyc/verascite/main/word-addin/manifest.xml
+```
+
+Checks every citation in the draft and writes a Word comment on each finding — and on
+**nothing** that is merely absent from an archive, because about one citation in ten in a real
+brief is missing from free sources and is perfectly sound. Only the citation strings leave the
+machine; never the document. [Install guide](word-addin/README.md).
+
 ### An MCP server, so the systems that write the citations can check them
 
 ```bash

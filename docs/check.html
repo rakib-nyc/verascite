@@ -319,7 +319,7 @@ footer a{color:var(--muted)}
       out.push({
         cite: cite,
         reporter: reporter,
-        claimed: nameMatch ? nameMatch[1].trim() : "",
+        claimed: nameMatch ? stripSignal(nameMatch[1]) : "",
         claimedYear: claimedYear(text, m.index + m[0].length),
         vendorOnly: VENDOR_ONLY.test(reporter),
         noSuchReporter: !VENDOR_ONLY.test(reporter) && !reporterExists(reporter)
@@ -349,6 +349,22 @@ footer a{color:var(--muted)}
 
   // The year the document asserts, taken only from a parenthetical directly
   // after the citation, so a stray four-digit number cannot become a finding.
+  // Introductory signals sit immediately before a case name and are not part of
+  // it. Left in, they end up quoted back at the reader in a Word comment as
+  // "the document cites this as But see Roe v. Wade", and they add tokens the
+  // name comparison never intended to see. The command-line extractor keeps
+  // signals in their own field for the same reason.
+  var SIGNAL = new RegExp(
+    "^(?:but\\s+)?(?:see\\s+also|see\\s+generally|see,\\s*e\\.g\\.,?|see|cf\\.|" +
+    "compare|accord|contra|e\\.g\\.,?|citing|quoting|following|overruling|" +
+    "rev'?d|aff'?d|cert\\.\\s+denied)\\s+", "i");
+
+  function stripSignal(name) {
+    var out = String(name || "").trim();
+    for (var i = 0; i < 3 && SIGNAL.test(out); i++) { out = out.replace(SIGNAL, "").trim(); }
+    return out;
+  }
+
   function claimedYear(text, endIndex) {
     var after = text.slice(endIndex, endIndex + 40);
     var m = after.match(/^[^()]{0,24}\((?:[^)]*?\b)?((?:19|20)\d{2})\)/);

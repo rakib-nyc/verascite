@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeraScite for Word</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<script src="../reporters.js"></script>
+<script src="../names.js"></script>
+<style>
+/* A task pane is ~320px wide and sits beside the document, so this is a
+   working panel rather than a page: dense, scannable, no hero. Colour carries
+   the verdict, and only one verdict gets a warning colour. */
+:root{
+  --ink:#0A1B2A; --prussian:#003153; --azure:#1668B0;
+  --page:#FFFFFF; --wash:#F3F7FA; --rule:#D5E0E9; --rule-soft:#E7EEF4;
+  --text:#12222F; --muted:#51687A; --faint:#8296A5;
+  --absent:#5A6B79; --absent-bg:#EDF1F4; --absent-edge:#D3DCE3;
+  --flag:#A8271F; --flag-bg:#FBECEA; --flag-edge:#E8CFCA;
+  --warn:#8A5A12; --warn-bg:#FFFBF4; --warn-edge:#EBD6B4;
+  --ok:#1D5B41; --ok-bg:#E8F1ED; --ok-edge:#C9DCD4;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font-size:13.5px;line-height:1.55;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+h1{font-size:14.5px;letter-spacing:-.02em;margin:0;color:var(--ink)}
+h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  margin:0;font-weight:600}
+p{margin:0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace}
+:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
+
+header{padding:12px 14px;border-bottom:1px solid var(--rule);display:flex;
+  align-items:center;justify-content:space-between;gap:8px}
+.wrap{padding:12px 14px 20px;display:flex;flex-direction:column;gap:12px}
+button{font:inherit;font-weight:600;font-size:12.5px;padding:9px 12px;border-radius:5px;
+  cursor:pointer;border:1px solid var(--prussian);background:var(--prussian);color:#fff;width:100%}
+button:disabled{opacity:.5;cursor:default}
+button.ghost{background:#fff;color:var(--prussian);border-color:var(--rule)}
+button.ghost:disabled{color:var(--faint)}
+.status{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--muted);
+  min-height:16px}
+.note{font-size:11.5px;color:var(--faint)}
+.note b{color:var(--muted)}
+
+.counts{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;font-weight:600;
+  padding:4px 7px;border-radius:3px;border:1px solid var(--rule);color:var(--muted);background:#fff}
+.pill.mismatch,.pill.noreporter{background:var(--flag-bg);color:var(--flag);border-color:var(--flag-edge)}
+.pill.yearoff{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-edge)}
+.pill.found{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-edge)}
+.pill.absent,.pill.vendor{background:var(--absent-bg);color:var(--absent);border-color:var(--absent-edge)}
+
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{border:1px solid var(--rule-soft);border-radius:5px;padding:10px 11px;background:#fff;
+  display:flex;flex-direction:column;gap:6px}
+.row.mismatch,.row.noreporter{background:var(--flag-bg);border-color:var(--flag-edge)}
+.row.yearoff{background:var(--warn-bg);border-color:var(--warn-edge)}
+.row.absent,.row.vendor{background:var(--absent-bg);border-color:var(--absent-edge)}
+.cite{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;
+  color:var(--ink);word-break:break-word}
+.chip{align-self:flex-start;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;
+  font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:3px 6px;border-radius:3px;
+  border:1px solid var(--rule);color:var(--muted);background:#fff}
+.chip.mismatch,.chip.noreporter{color:var(--flag);border-color:var(--flag-edge)}
+.chip.yearoff{color:var(--warn);border-color:var(--warn-edge)}
+.chip.found{color:var(--ok);border-color:var(--ok-edge);background:var(--ok-bg)}
+.chip.absent,.chip.vendor{color:var(--absent);border-color:var(--absent-edge)}
+.why{font-size:12px;color:var(--muted)}
+.why b{color:var(--text)}
+.row a{font-size:11.5px;color:var(--azure)}
+.divider{height:1px;background:var(--rule);margin:2px 0}
+.limits{background:var(--wash);border:1px solid var(--rule);border-radius:5px;padding:10px 12px;
+  font-size:11.5px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.limits b{color:var(--text)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>VeraScite</h1>
+  <span class="note" id="ver">checking citations</span>
+</header>
+
+<div class="wrap">
+
+  <button id="check" disabled>Check citations in this document</button>
+  <div class="status" id="status">Loading…</div>
+  <div class="counts" id="counts"></div>
+
+  <button class="ghost" id="comment" disabled>Add a comment on each finding</button>
+  <p class="note" id="commentNote">
+    Findings only — never on a citation that is merely absent from the archive.
+  </p>
+
+  <div class="divider"></div>
+  <div class="rows" id="rows"></div>
+
+  <div class="limits">
+    <p><b>What leaves this document:</b> only the citation strings, sent to the free
+      CourtListener archive. Never your text, never the draft.</p>
+    <p><b>What this cannot tell you:</b> whether a case says what you claim, whether a
+      quotation is real, whether a pincite is right, or whether an authority is still
+      good law.</p>
+    <p>Not legal advice. Certifies nothing. Responsibility for the filing stays with you.</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var GAP_MS = 900;
+  var MAX = 60;
+
+  var CITE = /\b(\d{1,4})\s+([A-Z][A-Za-z.'’]*(?:\s*[0-9]?[A-Za-z.'’]+){0,4}?)\s+(\d{1,7})(?=\b)/g;
+  var NOT_A_REPORTER = /^(?:U\.?S\.?C|C\.?F\.?R|Stat|Pub|No|Fed\.?\s*R|Cir|Supp\.?\s*$)/i;
+  var VENDOR_ONLY = /^(?:WL|LEXIS|U\.?S\.?\s*App\.?\s*LEXIS|U\.?S\.?\s*Dist\.?\s*LEXIS)$/i;
+
+  var LABEL = {
+    mismatch: "Different case at this citation",
+    noreporter: "No such reporter series",
+    yearoff: "Year does not match",
+    found: "Reported",
+    absent: "Not in this archive",
+    vendor: "No free source carries this",
+    error: "Could not check"
+  };
+
+  // Only these are contradictions. A comment is written for these and nothing
+  // else, because a margin comment on a citation that is merely absent from a
+  // free archive is an accusation the evidence does not support.
+  var FINDINGS = { mismatch: 1, noreporter: 1, yearoff: 1 };
+
+  var EXPLAIN = {
+    mismatch: function (i) {
+      return "The document cites this as <b>" + esc(i.claimed) + "</b>, but the archive " +
+        "reports the case at this citation as <b>" + esc(i.actual) + "</b>. Those are " +
+        "different cases." + (i.yearOff ? " The year differs too: " + esc(i.claimedYear) +
+        " against " + esc(i.filedYear) + "." : "");
+    },
+    noreporter: function (i) {
+      return "<b>" + esc(i.reporter) + "</b> is not among the 1,342 reporter series " +
+        "recognised in American law. Every published American case appears in one of them.";
+    },
+    yearoff: function (i) {
+      return "Reported as <b>" + esc(i.actual) + "</b>, which matches the name — but the " +
+        "document says <b>" + esc(i.claimedYear) + "</b> and the record was filed in <b>" +
+        esc(i.filedYear) + "</b>.";
+    },
+    found: function (i) {
+      return "Reported as <b>" + esc(i.actual) + "</b>." +
+        (i.claimed ? " Consistent with the name in the document — the name only, not the " +
+         "quotation, the page, or what the case holds." : "");
+    },
+    absent: function () {
+      return "<b>This does not mean the citation is fake.</b> This archive does not hold " +
+        "it. Recent decisions, unpublished dispositions, state trial courts and cases " +
+        "carried only by paid services are routinely absent — about one in ten. Check it " +
+        "elsewhere before relying on it, and before removing it.";
+    },
+    vendor: function () {
+      return "A vendor database identifier. No free archive carries these, so nothing free " +
+        "can confirm or deny it. A gap in public access, not a mark against the citation.";
+    },
+    error: function (i) { return esc(i.reason || "The archive could not be reached."); }
+  };
+
+  // Text written into a Word comment. Plain, short, and it says what to do.
+  var COMMENT = {
+    mismatch: function (i) {
+      return "VeraScite: the archive reports the case at " + i.cite + " as “" +
+        i.actual + "”, not “" + i.claimed + "”. Confirm which case you " +
+        "mean before filing." +
+        (i.yearOff ? " The year also differs (" + i.claimedYear + " vs " + i.filedYear + ")." : "");
+    },
+    noreporter: function (i) {
+      return "VeraScite: “" + i.reporter + "” is not a reporter series recognised " +
+        "in American law. Every published American case appears in one. Confirm this " +
+        "citation against the case itself.";
+    },
+    yearoff: function (i) {
+      return "VeraScite: the name matches, but this document gives the year as " +
+        i.claimedYear + " and the record was filed in " + i.filedYear + ". Check the year, " +
+        "and check you have the right decision.";
+    }
+  };
+
+  var statusEl = document.getElementById("status");
+  var rowsEl = document.getElementById("rows");
+  var countsEl = document.getElementById("counts");
+  var checkBtn = document.getElementById("check");
+  var commentBtn = document.getElementById("comment");
+  var results = [];
+
+  function esc(s) {
+    var d = document.createElement("div");
+    d.textContent = s == null ? "" : String(s);
+    return d.innerHTML;
+  }
+
+  function reporterExists(reporter) {
+    var set = window.VERASCITE_REPORTERS;
+    if (!set) { return true; }
+    if (set.has(reporter)) { return true; }
+    var squashed = reporter.replace(/\s+/g, "");
+    var loose = reporter.replace(/\./g, "").replace(/\s+/g, " ").trim();
+    var it = set.values(), n;
+    while (!(n = it.next()).done) {
+      var v = n.value;
+      if (v.replace(/\s+/g, "") === squashed) { return true; }
+      if (v.replace(/\./g, "").replace(/\s+/g, " ").trim() === loose) { return true; }
+    }
+    return false;
+  }
+
+  function nameVerdict(claimed, actual) {
+    var N = window.VERASCITE_NAMES;
+    if (!N || !claimed || !actual) { return "unclear"; }
+    return N.compare(claimed, actual);
+  }
+
+  // Introductory signals sit immediately before a case name and are not part of
+  // it. Left in, they end up quoted back at the reader in a Word comment as
+  // "the document cites this as But see Roe v. Wade", and they add tokens the
+  // name comparison never intended to see. The command-line extractor keeps
+  // signals in their own field for the same reason.
+  var SIGNAL = new RegExp(
+    "^(?:but\\s+)?(?:see\\s+also|see\\s+generally|see,\\s*e\\.g\\.,?|see|cf\\.|" +
+    "compare|accord|contra|e\\.g\\.,?|citing|quoting|following|overruling|" +
+    "rev'?d|aff'?d|cert\\.\\s+denied)\\s+", "i");
+
+  function stripSignal(name) {
+    var out = String(name || "").trim();
+    for (var i = 0; i < 3 && SIGNAL.test(out); i++) { out = out.replace(SIGNAL, "").trim(); }
+    return out;
+  }
+
+  function claimedYear(text, endIndex) {
+    var after = text.slice(endIndex, endIndex + 40);
+    var m = after.match(/^[^()]{0,24}\((?:[^)]*?\b)?((?:19|20)\d{2})\)/);
+    return m ? m[1] : "";
+  }
+
+  function extract(text) {
+    var out = [], seen = {}, m;
+    CITE.lastIndex = 0;
+    while ((m = CITE.exec(text)) !== null) {
+      var reporter = m[2].replace(/\s+/g, " ").trim();
+      if (NOT_A_REPORTER.test(reporter) || !/[A-Za-z]/.test(reporter)) { continue; }
+      var cite = m[1] + " " + reporter + " " + m[3];
+      var key = cite.toLowerCase();
+      if (seen[key]) { continue; }
+      seen[key] = 1;
+      var before = text.slice(Math.max(0, m.index - 90), m.index);
+      var nameMatch = before.match(
+        /([A-Z][A-Za-z0-9'’&.,\- ]{1,70}?\sv\.?\s[A-Za-z0-9'’&.,\- ]{2,60}?)[,\s]*$/);
+      out.push({
+        cite: cite,
+        reporter: reporter,
+        claimed: nameMatch ? stripSignal(nameMatch[1]) : "",
+        claimedYear: claimedYear(text, m.index + m[0].length),
+        vendorOnly: VENDOR_ONLY.test(reporter),
+        noSuchReporter: !VENDOR_ONLY.test(reporter) && !reporterExists(reporter)
+      });
+      if (out.length >= MAX) { break; }
+    }
+    return out;
+  }
+
+  function classify(item, res) {
+    if (res.state !== "found") { return Object.assign({}, item, res); }
+    var merged = Object.assign({}, item, res);
+    var verdict = nameVerdict(item.claimed, res.actual);
+    var filedYear = (res.dateFiled || "").slice(0, 4);
+    merged.filedYear = filedYear;
+    merged.yearOff = !!(item.claimedYear && filedYear && item.claimedYear !== filedYear);
+    if (verdict === "mismatch") { merged.state = "mismatch"; }
+    else if (merged.yearOff) { merged.state = "yearoff"; }
+    return merged;
+  }
+
+  function lookup(cite) {
+    var url = "https://www.courtlistener.com/api/rest/v4/search/?type=o&q=" +
+      encodeURIComponent('citation:("' + cite + '")');
+    return fetch(url, { headers: { Accept: "application/json" } })
+      .then(function (r) {
+        if (!r.ok) { throw new Error("HTTP " + r.status); }
+        return r.json();
+      })
+      .then(function (d) {
+        var hit = (d.results || [])[0];
+        if (!d.count || !hit) { return { state: "absent" }; }
+        return {
+          state: "found",
+          actual: hit.caseName || "(unnamed)",
+          dateFiled: hit.dateFiled || "",
+          url: hit.absolute_url ? "https://www.courtlistener.com" + hit.absolute_url : ""
+        };
+      })
+      .catch(function (err) {
+        return { state: "error",
+          reason: "Could not reach the archive (" + err.message + "). That is a " +
+                  "connection problem, not a finding about this citation." };
+      });
+  }
+
+  function renderRow(item) {
+    var d = document.createElement("div");
+    d.className = "row " + item.state;
+    var c = document.createElement("div");
+    c.className = "cite"; c.textContent = item.cite;
+    var chip = document.createElement("span");
+    chip.className = "chip " + item.state; chip.textContent = LABEL[item.state];
+    var why = document.createElement("p");
+    why.className = "why"; why.innerHTML = EXPLAIN[item.state](item);
+    d.appendChild(c); d.appendChild(chip); d.appendChild(why);
+    if (item.url) {
+      var a = document.createElement("a");
+      a.href = item.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+      a.textContent = "Open the case →";
+      d.appendChild(a);
+    }
+    return d;
+  }
+
+  function renderCounts() {
+    var counts = {};
+    results.forEach(function (r) { counts[r.state] = (counts[r.state] || 0) + 1; });
+    countsEl.innerHTML = "";
+    ["mismatch", "noreporter", "yearoff", "found", "absent", "vendor", "error"]
+      .forEach(function (k) {
+        if (!counts[k]) { return; }
+        var s = document.createElement("span");
+        s.className = "pill " + k;
+        s.textContent = counts[k] + " " + LABEL[k].toLowerCase();
+        countsEl.appendChild(s);
+      });
+  }
+
+  /* ---- Word ---- */
+
+  function documentText() {
+    return Word.run(function (context) {
+      var body = context.document.body;
+      body.load("text");
+      return context.sync().then(function () { return body.text || ""; });
+    });
+  }
+
+  function addComments() {
+    var findings = results.filter(function (r) { return FINDINGS[r.state]; });
+    if (!findings.length) { return Promise.resolve(0); }
+    return Word.run(function (context) {
+      var searches = findings.map(function (f) {
+        var res = context.document.body.search(f.cite, { matchCase: false });
+        res.load("items");
+        return { finding: f, results: res };
+      });
+      return context.sync().then(function () {
+        var written = 0;
+        searches.forEach(function (s) {
+          var hit = s.results.items && s.results.items[0];
+          if (!hit) { return; }
+          try {
+            hit.insertComment(COMMENT[s.finding.state](s.finding));
+            written += 1;
+          } catch (e) { /* older Word build without the comment API */ }
+        });
+        return context.sync().then(function () { return written; });
+      });
+    });
+  }
+
+  function run() {
+    checkBtn.disabled = true;
+    commentBtn.disabled = true;
+    rowsEl.innerHTML = "";
+    countsEl.innerHTML = "";
+    results = [];
+
+    documentText().then(function (text) {
+      var items = extract(text);
+      if (!items.length) {
+        statusEl.textContent = "No reporter citations found in this document.";
+        checkBtn.disabled = false;
+        return;
+      }
+      var i = 0;
+      (function step() {
+        if (i >= items.length) {
+          var findings = results.filter(function (r) { return FINDINGS[r.state]; }).length;
+          statusEl.textContent = "Checked " + results.length + " citation" +
+            (results.length === 1 ? "" : "s") + ".";
+          checkBtn.disabled = false;
+          commentBtn.disabled = findings === 0;
+          document.getElementById("commentNote").textContent = findings
+            ? findings + " finding" + (findings === 1 ? "" : "s") +
+              " can be commented. Nothing is written on a citation that is merely absent."
+            : "No findings to comment on.";
+          return;
+        }
+        var item = items[i];
+        statusEl.textContent = "Checking " + (i + 1) + " of " + items.length + "…";
+
+        var settle = function (res) {
+          var merged = classify(item, res);
+          results.push(merged);
+          rowsEl.appendChild(renderRow(merged));
+          renderCounts();
+          i += 1;
+          setTimeout(step, res.state === "found" ? GAP_MS : 0);
+        };
+
+        if (item.noSuchReporter) { settle({ state: "noreporter" }); return; }
+        if (item.vendorOnly) { settle({ state: "vendor" }); return; }
+        lookup(item.cite).then(settle);
+      })();
+    }).catch(function (err) {
+      statusEl.textContent = "Could not read the document (" + err.message + ").";
+      checkBtn.disabled = false;
+    });
+  }
+
+  Office.onReady(function (info) {
+    if (info.host !== Office.HostType.Word) {
+      statusEl.textContent = "This add-in runs in Word.";
+      return;
+    }
+    statusEl.textContent = "Ready.";
+    checkBtn.disabled = false;
+    checkBtn.addEventListener("click", run);
+    commentBtn.addEventListener("click", function () {
+      commentBtn.disabled = true;
+      statusEl.textContent = "Writing comments…";
+      addComments().then(function (n) {
+        statusEl.textContent = n
+          ? "Added " + n + " comment" + (n === 1 ? "" : "s") + " to the document."
+          : "Could not anchor comments — this Word build may not support them.";
+      }).catch(function (err) {
+        statusEl.textContent = "Could not add comments (" + err.message + ").";
+        commentBtn.disabled = false;
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
