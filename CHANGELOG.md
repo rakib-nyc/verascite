@@ -4,6 +4,87 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-09-10
+
+Repositioned around the thing that turned out to be unclaimed: not detecting
+defects, but declining to accuse a citation the sources cannot reach.
+
+### Why this release changes emphasis
+
+Four research streams — practitioner forums, malpractice claim taxonomies,
+competitive landscape, and the academic literature — agreed on an uncomfortable
+finding. Roughly one citation in ten in a real brief is absent from the free
+archives, and the published failure rates for that case run from **25% to 66%**:
+verifiers accuse sound authority of being fabricated. The literature names the
+fix as a calibrated three-state output and reports that nobody had built one.
+
+This project already had. It had never been measured as such, stated as the
+headline, or exposed where it would do the most good.
+
+### Added
+
+**The false-accusation measurement** (`evals/abstention/`). 996 sound citations
+from real federal appellate briefs; 95 of them (**9.5%**) unreachable by the
+sources consulted — a figure that independently corroborates the ~10.2% reported
+for the same corpus in the published work. **Zero were flagged.** Reproducible
+from cache; the run cost five requests.
+
+**Coverage reporting** (`verascite/coverage.py`). Every run now states how much
+of the document the sources could actually speak to, before the counts. A report
+showing two findings and eighteen confirmations reads very differently once the
+reader learns that eleven of the twenty citations were never in the corpus. The
+statement is written so it cannot be read as doubt about the citations
+themselves, and a run that consulted nothing says so rather than claiming
+coverage.
+
+**Plain-language reports** (`--plain`). The same findings written for someone
+who is not a lawyer. Of the US filings in which a court has found a fabricated
+citation, roughly **six in ten were filed by people representing themselves** —
+the largest affected population and the one least served by anything in this
+field. The explanation follows the check that actually failed, so an invented
+reporter is not described as "we found the case and it differs".
+
+**An MCP server** (`python -m verascite.mcp_server`). Verification exposed to the
+systems that generate the citations, before anything reaches a filing. Free
+lookup endpoints already answer "is there a case here"; what they do not do is
+decline properly. The server returns the same three-state answer the rest of the
+tool does — `contradicted` / `unverified` / `confirmed` — and ships the reporting
+constraint with every response, because a calling model paraphrases whatever it
+is handed. JSON-RPC over stdio, no dependencies beyond the standard library.
+
+### Fixed
+
+**`OUT_OF_SCOPE` named no sources.** Found by the abstention measurement itself:
+of 95 unreachable citations, **76 named nothing consulted**. The rule requiring a
+`NOT_FOUND` to say where it looked never covered `OUT_OF_SCOPE`, although both
+reach the reader as `UNVERIFIED` — so a verification record could say "not
+confirmed" without saying against what. All 95 now name their sources, locked by
+a test.
+
+### Measured
+
+| | |
+|---|---:|
+| Sound citations tested | 996 |
+| Unreachable by the sources | 95 (9.5%) |
+| **Falsely flagged** | **0** |
+| Across three independent samples | **0 in 345** |
+
+The three samples are this run, the 101-citation absent control, and the 149
+vendor-only identifiers from the sanctioned-filings corpus — the last of which
+*were* fabricated, with a judicial finding to prove it, and which the tool still
+declined to call fabricated.
+
+Comparison figures are drawn from published benchmark results on a different
+test set: comparable in task, not item for item.
+
+### Notes
+
+- 515 tests, up from 468.
+- No value in `config.py` changed.
+- The benchmark detection figures still predate the v0.2.5 case-name fix and are
+  conservative with respect to it.
+
 ## [0.2.5] — 2026-09-09
 
 External validation completed, and it did what external validation is supposed to

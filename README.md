@@ -1,11 +1,11 @@
-# VeraScite — legal citation verification that never guesses
+# VeraScite — the citation checker that refuses to guess
 
-**Detect fabricated, misattributed, and misrepresented case citations in legal briefs and AI-generated legal writing — with evidence for every finding.**
+**Detect fabricated, misattributed, and misrepresented case citations in legal briefs and AI-generated legal writing — and, just as importantly, never accuse a real one.**
 
 [![tests](https://github.com/rakib-nyc/verascite/actions/workflows/ci.yml/badge.svg)](https://github.com/rakib-nyc/verascite/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-0.2.5-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](CHANGELOG.md)
 
 > **Independent research project.** Experimental software, released for research and
 > evaluation. **No warranty of any kind. Every result requires human verification by a
@@ -58,6 +58,74 @@ right.
 
 Every check that could fire on absence has been measured and, where it could not clear that
 bar, **deliberately not built** — see [Measured and rejected](#measured-and-rejected).
+
+---
+
+## The number that matters most
+
+About **one citation in ten** in a real appellate brief is absent from the free
+archives — not fabricated, not defective, simply not held. Recent decisions, unpublished
+dispositions, state trial court orders and vendor-only identifiers are missing as a matter of
+routine.
+
+So the question that decides whether a citation checker is usable is not how much it catches.
+It is what it does with a citation it cannot find. Published figures for that case:
+
+| System | Test set | Sound citations falsely flagged as fabricated |
+|---|---|---:|
+| Gemini | 132 real-but-absent | **65.9%** |
+| GPT-5 | 132 real-but-absent | **25%** |
+| **VeraScite** | 95 unreachable, from 996 sound citations | **0%** |
+| **VeraScite** | 101 absent-from-all-sources control | **0%** |
+| **VeraScite** | 149 vendor-only, *court-adjudicated fabricated* | **0%** |
+
+**Zero false accusations across 345 unreachable citations**, from three independent samples.
+The third is the strongest: those citations really were fabricated and a court said so — and
+the tool still declined to say so, because a vendor-only identifier that was invented is
+indistinguishable from one naming a real unreported decision when no free source holds either.
+
+> Comparison rows come from published benchmark results on a different test set. Comparable
+> in task, not item for item. Full protocol and limits:
+> [`evals/abstention/PROTOCOL.md`](evals/abstention/PROTOCOL.md).
+
+Measured 9.5% unreachable on that corpus, independently corroborating the ~10.2% reported in
+the published work. Every run now tells you your own figure, before the counts:
+
+```
+> 11 citation(s) in this document are absent from the sources consulted and were
+> not examined. That reflects what the free archives hold, not the quality of
+> those citations. Read the counts below as describing only what could be examined.
+```
+
+---
+
+## New in v0.3.0
+
+### Plain-language reports, for the people who actually file these
+
+Of the US filings in which a court has found a fabricated citation, roughly **six in ten were
+filed by someone representing themselves** — no firm, no research subscription, and usually no
+idea that the tool which drafted their filing can invent authority.
+
+```bash
+verascite my-motion.docx --out ./check --plain
+```
+
+`plain-english.md` says the same things without vocabulary anyone has to look up, and takes
+particular care in the direction that matters: *"**This does not mean it is fake.** Many real
+cases are not in free archives."*
+
+### An MCP server, so the systems that write the citations can check them
+
+```bash
+python -m verascite.mcp_server
+```
+
+Free lookup APIs already answer *"is there a case at this citation."* What they do not do is
+decline properly. This returns the three-state answer — `contradicted` / `unverified` /
+`confirmed` — and ships the reporting constraint with **every** response, because a calling
+model paraphrases whatever it is handed and `NOT_FOUND` becomes "this case does not exist" in
+about three hops. JSON-RPC over stdio, standard library only.
 
 ---
 
@@ -681,7 +749,7 @@ Known measured weaknesses, stated plainly:
   author  = {Islam, Muhammad Rakibul},
   title   = {VeraScite: Transparent, Auditable Legal Citation Verification},
   year    = {2026},
-  version = {0.2.5},
+  version = {0.3.0},
   url     = {https://github.com/rakib-nyc/verascite},
   license = {Apache-2.0}
 }

@@ -31,6 +31,8 @@ if __package__ in (None, ""):  # allow `python verascite/run_audit.py`
 from verascite.clients.courtlistener import CourtListenerClient, CourtListenerError
 from verascite.clients.opinions import OpinionClient, page_texts_for
 from verascite.clients.statutes import StatuteClient
+from verascite.coverage import measure as measure_coverage
+from verascite.plain import write_plain
 from verascite.extract import extract
 from verascite.ingest import ingest
 from verascite.ledger import Ledger
@@ -231,6 +233,16 @@ def build_parser() -> argparse.ArgumentParser:
             "allow downloading a US Code title (~18MB, cached) when a citation "
             "names a subsection. Without this, subsections are reported "
             "unchecked rather than guessed at"
+        ),
+    )
+    parser.add_argument(
+        "--plain",
+        action="store_true",
+        help=(
+            "also write plain-english.md, the same findings written for someone "
+            "who is not a lawyer. Intended for self-represented litigants, who "
+            "file the majority of documents in which courts have found fabricated "
+            "citations"
         ),
     )
     parser.add_argument(
@@ -538,6 +550,39 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_INTERRUPTED
 
 
+def _run_pipeline_for_mcp(document, offline: bool = False):
+    """Run the deterministic stages over an already-ingested document.
+
+    Factored out for the MCP server, which has a document in hand and no output
+    directory to write to. Deliberately the deterministic stages only: a server
+    answering a drafting system should be fast, reproducible, and free of any
+    model the caller did not ask for.
+    """
+    citations, notes = extract(document)
+    ledger = resolve(document, citations, notes)
+
+    client = None
+    if not offline:
+        client = CourtListenerClient(cache_dir=Path(".verascite-cache"))
+    ledger.sources_available = ["reporters_db", "courts_db"] + (
+        ["courtlistener_citation_lookup"] if client and client.has_token else []
+    )
+
+    statute_client = None if offline else StatuteClient(cache_dir=Path(".verascite-cache"))
+    for entry in ledger:
+        try:
+            verify_statute(entry, statute_client, offline=offline)
+        except Exception:
+            pass  # a source failure is never a verdict
+
+    try:
+        verify_existence(ledger, client, offline=offline, fetch_courts=False)
+    except CourtListenerError as exc:
+        ledger.run_meta["existence_lookup_error"] = str(exc)
+    verify_metadata(ledger)
+    return ledger
+
+
 def _run_batch(args) -> int:
     """Review every document under a directory, then summarise."""
     documents = find_documents(args.document, recursive=not args.no_recurse)
@@ -706,6 +751,11 @@ def _run(args) -> int:
             verify_treatment(entry)
     ledger.checkpoint(ledger_path)
 
+    # How much of the document the sources could speak to. Computed last, so it
+    # reflects every stage, and recorded before the report is rendered.
+    ledger.run_meta["coverage"] = measure_coverage(ledger).to_dict()
+    ledger.checkpoint(ledger_path)
+
     report_path = args.out / "report.md"
     write_report(ledger, report_path)
 
@@ -718,6 +768,15 @@ def _run(args) -> int:
             # The report is the deliverable; the record must never take a run down.
             print(f"note: could not write the verification record: {exc}", file=sys.stderr)
             record_path = None
+
+    plain_path = None
+    if getattr(args, "plain", False):
+        plain_path = args.out / "plain-english.md"
+        try:
+            write_plain(ledger, args.document, plain_path)
+        except OSError as exc:
+            print(f"note: could not write the plain-language report: {exc}", file=sys.stderr)
+            plain_path = None
 
     annotated_path = None
     if not args.no_annotate and args.document.suffix.lower() == ".docx":
@@ -740,6 +799,8 @@ def _run(args) -> int:
         print(f"report  {report_path}")
         if record_path:
             print(f"record  {record_path}")
+        if plain_path:
+            print(f"plain   {plain_path}")
     if annotated_path:
         print(f"marked  {annotated_path}")
 
@@ -786,6 +847,7 @@ def audit_document(
     args.no_quotes = not quotes
     args.no_annotate = not annotate
     args.no_record = not record
+    args.plain = False
     args.no_statutes = False
     args.download_code_titles = False
     args.quiet = quiet

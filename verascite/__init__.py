@@ -4,4 +4,4 @@ The deterministic core runs with no model in the loop. Every check is
 independently runnable from the CLI, and every verdict carries its evidence.
 """
 
-__version__ = "0.2.5"
+__version__ = "0.3.0"

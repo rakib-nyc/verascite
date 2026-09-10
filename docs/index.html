@@ -23,7 +23,7 @@
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"VeraScite",
 "applicationCategory":"DeveloperApplication","operatingSystem":"Cross-platform",
 "description":"Open-source legal citation verification. Detects fabricated, misattributed, and misrepresented case citations in legal briefs and AI-generated legal writing.",
-"softwareVersion":"0.2.5","license":"https://www.apache.org/licenses/LICENSE-2.0",
+"softwareVersion":"0.3.0","license":"https://www.apache.org/licenses/LICENSE-2.0",
 "author":{"@type":"Person","name":"Muhammad Rakibul Islam","email":"rakib.islam@rutgers.edu"},
 "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
 "codeRepository":"https://github.com/rakib-nyc/verascite","programmingLanguage":"Python"}
@@ -244,6 +244,8 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
   <div class="nl">
     <a href="#failure">Failure modes</a>
     <a href="#verdicts">Verdicts</a>
+    <a href="#abstain">Abstention</a>
+    <a href="#reach">Reach</a>
     <a href="#reading">Reading</a>
     <a href="#record">Record</a>
     <a href="#results">Results</a>
@@ -260,7 +262,7 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== HERO ===== -->
 <section class="hero">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*544</b>VeraScite 0.2.5</div></div>
+    <div class="rail"><div class="mark"><b>*544</b>VeraScite 0.3.0</div></div>
     <div class="body">
       <div class="kicker">Independent research &nbsp;/&nbsp; Apache 2.0 &nbsp;/&nbsp; not legal advice</div>
       <h1>A citation is an address. Verification means going there.</h1>
@@ -379,10 +381,120 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
   </div>
 </section>
 
+<!-- ===== THE ABSTENTION RESULT ===== -->
+<section id="abstain" class="pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*547</b>Abstention</div></div>
+    <div class="body">
+      <h2>The number that decides whether a checker is usable</h2>
+      <p class="lede">
+        About <b>one citation in ten</b> in a real appellate brief is absent from the free
+        archives &mdash; not fabricated, not defective, simply not held. Recent decisions,
+        unpublished dispositions, state trial courts and vendor-only identifiers go missing as
+        a matter of routine.
+      </p>
+      <p class="lede" style="margin-top:16px">
+        So the question is not how much a checker catches. It is what it does with a citation
+        it cannot find. A tool that answers that badly does not fail occasionally &mdash; it
+        accuses sound authority a tenth of the time.
+      </p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>System</th><th>Test set</th><th class="num">Sound citations called fabricated</th></tr></thead>
+          <tbody>
+            <tr><td>Gemini</td><td>132 real-but-absent</td><td class="num">65.9%</td></tr>
+            <tr><td>GPT-5</td><td>132 real-but-absent</td><td class="num">25%</td></tr>
+            <tr class="mine"><td><b>VeraScite</b></td><td>95 unreachable, of 996 sound citations</td><td class="num"><b>0%</b></td></tr>
+            <tr class="mine"><td><b>VeraScite</b></td><td>101 absent-from-all-sources control</td><td class="num"><b>0%</b></td></tr>
+            <tr class="mine"><td><b>VeraScite</b></td><td>149 vendor-only, <em>court-adjudicated fabricated</em></td><td class="num"><b>0%</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="two" style="margin-top:34px">
+        <div>
+          <h3>Zero in 345, across three independent samples</h3>
+          <p>The last row is the strongest and the least intuitive. Those citations really were
+          fabricated &mdash; a court said so in an order. The tool still declined to say so,
+          because a vendor-only identifier that was invented is indistinguishable from one
+          naming a real unreported decision when no free source holds either.</p>
+          <p>Refusing to guess there is the same behaviour that produces the zeros above, seen
+          from the opposite direction.</p>
+        </div>
+        <div>
+          <h3>And it tells you your own figure</h3>
+          <p>Measured 9.5% unreachable on that corpus &mdash; independently corroborating the
+          ~10.2% reported in the published work. Every run now states its own coverage before
+          the counts, so &ldquo;nothing found&rdquo; can never be read as &ldquo;nothing
+          there&rdquo;.</p>
+          <div class="term">
+            <pre><span class="tc">11 citation(s) in this document are absent from</span>
+<span class="tc">the sources consulted and were not examined.</span>
+<span class="tc">That reflects what the free archives hold, not</span>
+<span class="tc">the quality of those citations.</span></pre>
+          </div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:26px">
+        <p>Comparison rows are published benchmark results on a <b>different test set</b> &mdash;
+        comparable in task, not item for item. Running this harness over those exact 132
+        citations is the obvious next step and has not been done. Full protocol and limits are
+        in the repository.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WHO THIS IS FOR ===== -->
+<section id="reach" class="pad">
+  <div class="sheet">
+    <div class="rail"><div class="mark"><b>*548</b>Reach</div></div>
+    <div class="body">
+      <h2>Two surfaces, for the two populations that actually need this</h2>
+
+      <div class="two" style="margin-top:30px">
+        <div>
+          <h3>People representing themselves</h3>
+          <p>Of the US filings in which a court has found a fabricated citation, roughly
+          <b>six in ten were filed by someone with no lawyer</b> &mdash; no firm, no research
+          subscription, and usually no idea that the tool which drafted their filing can invent
+          authority that does not exist. They are the largest affected population and the one
+          least served by anything in this field.</p>
+          <div class="term">
+            <pre><span class="tk">$</span> verascite my-motion.docx --out ./check <span class="ty">--plain</span></pre>
+          </div>
+          <p style="margin-top:14px">The same findings, without vocabulary anyone has to look
+          up &mdash; and taking particular care in the direction that matters:</p>
+          <blockquote class="quote" style="margin-top:6px"><b>This does not mean it is fake.</b>
+          Many real cases are not in free archives &mdash; recent ones, unpublished ones, state
+          trial courts, and cases only paid services carry.</blockquote>
+        </div>
+        <div>
+          <h3>The systems that write the citations</h3>
+          <p>The useful place to check a citation is inside the drafting tool, before anything
+          reaches a filing &mdash; not in a separate application someone has to remember to
+          open afterwards.</p>
+          <div class="term">
+            <pre><span class="tk">$</span> python -m verascite.mcp_server</pre>
+          </div>
+          <p style="margin-top:14px">Free lookup endpoints already answer <em>&ldquo;is there a
+          case at this citation.&rdquo;</em> What they do not do is <b>decline properly</b>.
+          This returns the three-state answer &mdash; <code class="mono">contradicted</code> /
+          <code class="mono">unverified</code> / <code class="mono">confirmed</code> &mdash; and
+          ships the reporting constraint with <em>every</em> response, because a calling model
+          paraphrases whatever it is handed, and <code class="mono">NOT_FOUND</code> becomes
+          &ldquo;this case does not exist&rdquo; in about three hops.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== NEW IN 0.2.0: THE HALF THAT WAS UNREACHABLE ===== -->
 <section id="reading" class="dark pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*547</b>Reading</div></div>
+    <div class="rail"><div class="mark"><b>*549</b>Reading</div></div>
     <div class="body">
       <h2>The half of the tool users could not reach</h2>
       <p class="lede">
@@ -447,7 +559,7 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== RECORD + STATUTES ===== -->
 <section id="record" class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*548</b>Record</div></div>
+    <div class="rail"><div class="mark"><b>*550</b>Record</div></div>
     <div class="body">
       <h2>The artifact a standing order actually contemplates</h2>
       <p class="lede">
@@ -495,7 +607,7 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== MEASURED ===== -->
 <section id="results" class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*549</b>Measured</div></div>
+    <div class="rail"><div class="mark"><b>*551</b>Measured</div></div>
     <div class="body">
       <h2>What it catches, and what it misses</h2>
       <p class="lede">
@@ -553,7 +665,7 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== REJECTED ===== -->
 <section id="rejected" class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*550</b>Rejected</div></div>
+    <div class="rail"><div class="mark"><b>*552</b>Rejected</div></div>
     <div class="body">
       <h2>Three checks that would have raised recall, and were not shipped</h2>
       <p class="lede">
@@ -644,7 +756,7 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== EXTERNAL VALIDATION ===== -->
 <section id="external" class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*551</b>Validation</div></div>
+    <div class="rail"><div class="mark"><b>*553</b>Validation</div></div>
     <div class="body">
       <h2>Citations courts actually sanctioned</h2>
       <p class="lede">
@@ -725,7 +837,7 @@ footer ul{list-style:none;padding:0;margin:0;font-size:.89rem;line-height:1.95}
 <!-- ===== PIPELINE + RUN ===== -->
 <section class="dark pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*552</b>Pipeline</div></div>
+    <div class="rail"><div class="mark"><b>*554</b>Pipeline</div></div>
     <div class="body">
       <div class="two">
         <div>
@@ -777,7 +889,7 @@ report  ./audit/report.md</pre>
 <!-- ===== USE ===== -->
 <section id="use" class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*553</b>Use</div></div>
+    <div class="rail"><div class="mark"><b>*555</b>Use</div></div>
     <div class="body">
       <h2>Putting it to work</h2>
       <div class="two" style="margin-top:30px">
@@ -878,7 +990,7 @@ ledger = audit_document(
 <!-- ===== LIMITS ===== -->
 <section class="pad">
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*554</b>Limits</div></div>
+    <div class="rail"><div class="mark"><b>*556</b>Limits</div></div>
     <div class="body">
       <h2>What this does not do</h2>
       <div class="note stop" style="margin-top:22px">
@@ -904,7 +1016,7 @@ ledger = audit_document(
 
 <footer>
   <div class="sheet">
-    <div class="rail"><div class="mark"><b>*555</b>Colophon</div></div>
+    <div class="rail"><div class="mark"><b>*557</b>Colophon</div></div>
     <div class="body">
       <div class="fg">
         <div>

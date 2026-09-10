@@ -109,3 +109,40 @@ def test_remediation_text_distinguishes_absence_from_contradiction():
     assert "NOT a finding" in not_found.remediation
     assert not not_found.is_fabrication_signal
     assert fail.is_fabrication_signal
+
+
+def test_every_unverified_names_what_was_consulted():
+    """A citation nobody could confirm must say where we looked.
+
+    The rule was written for NOT_FOUND, but OUT_OF_SCOPE reaches the reader as
+    UNVERIFIED too -- a vendor-only identifier, a journal, a statute the case
+    endpoint does not serve. Found by measurement: 76 of 95 unreachable
+    citations in the benchmark corpus were OUT_OF_SCOPE and named nothing, so a
+    verification record could say "not confirmed" without saying against what.
+    """
+    from verascite.extract import extract
+    from verascite.models import Document
+    from verascite.resolve import resolve
+    from verascite.verdicts import Overall
+    from verascite.verify_existence import verify_existence
+
+    # One of each shape that routes to OUT_OF_SCOPE.
+    text = (
+        "See Tinch v. Video Indus. Servs., Inc., 2019 WL 1396975 (E.D. Mich. 2019). "
+        "See also 42 U.S.C. 1983 and 90 Harv. L. Rev. 1281 (1977). "
+        "And 2020 U.S. App. LEXIS 28454."
+    )
+    document = Document(text=text, source_path="x", source_format="md")
+    cites, notes = extract(document)
+    ledger = resolve(document, cites, notes)
+    verify_existence(ledger, None, offline=True, fetch_courts=False)
+
+    for entry in ledger:
+        check = entry.checks.get("existence")
+        if check is None:
+            continue
+        if check.verdict in (Verdict.NOT_FOUND, Verdict.OUT_OF_SCOPE):
+            assert check.sources_consulted, (
+                f"{entry.citation.raw_text!r} reports {check.verdict.value} "
+                "without naming what was consulted"
+            )

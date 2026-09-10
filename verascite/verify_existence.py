@@ -406,6 +406,7 @@ def verify_existence(
                         "CourtListener citation-lookup endpoint; verify against "
                         "GovInfo, eCFR, or the issuing jurisdiction"
                     ),
+                    sources_consulted=[SOURCE_NAME],
                 ),
             )
             continue
@@ -416,6 +417,7 @@ def verify_existence(
                 CheckResult(
                     Verdict.OUT_OF_SCOPE,
                     reason="secondary sources are outside this pipeline's coverage",
+                    sources_consulted=[SOURCE_NAME],
                 ),
             )
             continue
@@ -431,6 +433,7 @@ def verify_existence(
                         "not served by the citation-lookup endpoint. Verify against "
                         "the issuing source."
                     ),
+                    sources_consulted=[SOURCE_NAME],
                 ),
             )
             continue
@@ -449,6 +452,7 @@ def verify_existence(
                         "Verify in Westlaw or Lexis directly. This is a known "
                         "coverage gap, not a fabrication signal."
                     ),
+                                        sources_consulted=[SOURCE_NAME],
                 ),
             )
             continue

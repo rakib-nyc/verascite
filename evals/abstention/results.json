@@ -1,0 +1,32 @@
+{
+  "summary": {
+    "clean_citations_tested": 996,
+    "unparsed": 0,
+    "scored": 996,
+    "absent_from_sources": 95,
+    "absent_share": 0.0954,
+    "false_accusations_on_absent": 0,
+    "false_accusation_rate": 0.0,
+    "every_absent_names_its_sources": true,
+    "flagged_among_found": 1,
+    "flagged_among_found_note": "Not false accusations by construction. The benchmark labels only injected errors, so an error already present in the filed brief carries no label. Verify by hand before counting these either way.",
+    "absent_by_kind": {
+      "OUT_OF_SCOPE": 76,
+      "NOT_FOUND": 19
+    },
+    "absent_result_distribution": {
+      "UNVERIFIED": 95
+    },
+    "found_result_distribution": {
+      "REVIEW": 773,
+      "VERIFIED": 127,
+      "FLAGGED": 1
+    },
+    "reference_points": {
+      "gemini_false_flag_rate": 0.659,
+      "gpt5_false_flag_rate": 0.25,
+      "source": "Liu, Stammbach & Henderson, arXiv:2606.21155, on 132 real-but-absent citations. Different test set: comparable in task, not item-for-item."
+    },
+    "requests_made": 1
+  }
+}

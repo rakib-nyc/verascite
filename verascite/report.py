@@ -345,6 +345,15 @@ def _scope_section(ledger: Ledger) -> list[str]:
     meta = ledger.run_meta
     lines = ["## What was checked", ""]
 
+    coverage = meta.get("coverage") or {}
+    if coverage.get("statement"):
+        lines.append("**How much of this document the sources could speak to**")
+        lines.append("")
+        lines.append(coverage["statement"])
+        lines.append("")
+        lines.append(f"> {coverage.get('caveat', '')}")
+        lines.append("")
+
     lines.append("**Sources consulted**")
     lines.append("")
     for source in ledger.sources_available or ["(none)"]:
@@ -489,6 +498,21 @@ def render_report(ledger: Ledger, generated_at: Optional[str] = None) -> str:
     lines.append(DISCLOSURE)
     lines.append("---")
     lines.append("")
+
+    headline = (ledger.run_meta.get("coverage") or {}).get("statement", "")
+    absent = (ledger.run_meta.get("coverage") or {}).get("absent_from_sources", 0)
+    reach = (ledger.run_meta.get("coverage") or {}).get("reachable_share")
+    if absent and reach is not None and reach < 0.85:
+        # Stated before the counts, because a summary read without it invites
+        # the reader to treat "nothing found" as "nothing there".
+        lines.append(
+            f"> **{absent} citation(s) in this document are absent from the sources "
+            f"consulted and were not examined.** That reflects what the free archives "
+            "hold, not the quality of those citations, and it is routine for briefs "
+            "relying on recent, unpublished, or vendor-reported decisions. Read the "
+            "counts below as describing only what could be examined."
+        )
+        lines.append("")
 
     lines.append("## Summary")
     lines.append("")
