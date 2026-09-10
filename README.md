@@ -101,6 +101,10 @@ the published work. Every run now tells you your own figure, before the counts:
 
 ## New in v0.3.0
 
+**New guide:** [`docs/WORKFLOW.md`](docs/WORKFLOW.md) — checking citations from an
+AI-assisted research session, written for students, independent researchers, and anyone
+working without a paid research subscription.
+
 ### Plain-language reports, for the people who actually file these
 
 Of the US filings in which a court has found a fabricated citation, roughly **six in ten were
