@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "VeraScite — check legal citations",
+  "version": "0.3.0",
+  "description": "Check the legal citations on any page against free public archives. Never reports a citation as fabricated for being absent.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["https://www.courtlistener.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Check legal citations on this page"
+  },
+  "background": { "service_worker": "background.js" },
+  "icons": { "128": "icon128.png" }
+}
