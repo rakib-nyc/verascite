@@ -88,6 +88,7 @@
           cite: cite,
           reporter: reporter,
           claimed: nameMatch ? nameMatch[1].trim() : "",
+          claimedYear: claimedYear(text, m.index + m[0].length),
           vendorOnly: VENDOR_ONLY.test(reporter),
           noSuchReporter: !VENDOR_ONLY.test(reporter) && !reporterExists(reporter)
         });
@@ -117,7 +118,9 @@
   /* ---- the panel ---- */
 
   var LABEL = {
+    mismatch: "Different case at this citation",
     noreporter: "No such reporter series",
+    yearoff: "Year does not match",
     found: "Reported",
     absent: "Not in this archive",
     vendor: "No free source carries this",
@@ -133,15 +136,25 @@
     },
     found: function (i) {
       var s = "Reported as <b>" + esc(i.actual) + "</b>.";
-      if (i.claimed && looksDifferent(i.claimed, i.actual)) {
-        s += " The page calls this <b>" + esc(i.claimed) + "</b>. <b>Compare them" +
-             "</b> — a citation attached to the wrong case is the commonest defect " +
-             "there is. This is a prompt to look, not a finding.";
-      } else if (i.claimed) {
+      if (i.claimed) {
         s += " Consistent with the name on the page. That confirms the name only — " +
              "not the quotation, the page, or what the case holds.";
       }
       return s;
+    },
+    mismatch: function (i) {
+      return "The page cites this as <b>" + esc(i.claimed) + "</b>, but the archive " +
+        "reports the case at this citation as <b>" + esc(i.actual) + "</b>. Those are " +
+        "different cases. <b>A source was retrieved and it contradicts the page</b> — " +
+        "this is a finding, not a prompt." +
+        (i.yearOff ? " The year is wrong too: the page says " + esc(i.claimedYear) +
+          ", the record was filed " + esc(i.filedYear) + "." : "");
+    },
+    yearoff: function (i) {
+      return "Reported as <b>" + esc(i.actual) + "</b>, which matches the name on the " +
+        "page — but the page says <b>" + esc(i.claimedYear) + "</b> and the record was " +
+        "filed in <b>" + esc(i.filedYear) + "</b>. Check the year, and check you have " +
+        "the right decision: some cases have a later history at a different citation.";
     },
     absent: function () {
       return "<b>This does not mean the citation is fake.</b> This archive does not " +
@@ -158,24 +171,46 @@
     error: function (i) { return esc(i.reason || "The archive could not be reached."); }
   };
 
+      // A retrieved record that names a different case is a contradiction, not a
+      // hint. This is the second-largest defect class and it is the whole reason
+      // the page reports the real case name rather than a bare found/not-found.
+      function classify(item, res) {
+        if (res.state !== "found") { return res; }
+        var merged = Object.assign({}, res);
+        var verdict = nameVerdict(item.claimed, res.actual);
+        var filedYear = (res.dateFiled || "").slice(0, 4);
+        var yearOff = !!(item.claimedYear && filedYear && item.claimedYear !== filedYear);
+        merged.filedYear = filedYear;
+        merged.claimedYear = item.claimedYear || "";
+        merged.yearOff = yearOff;
+        if (verdict === "mismatch") { merged.state = "mismatch"; }
+        else if (yearOff) { merged.state = "yearoff"; }
+        return merged;
+      }
+
   function esc(s) {
     var d = document.createElement("div");
     d.textContent = s == null ? "" : String(s);
     return d.innerHTML;
   }
 
-  function looksDifferent(claimed, actual) {
-    if (!claimed || !actual) { return false; }
-    var norm = function (s) {
-      return s.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/)
-        .filter(function (w) { return w.length > 3 && w !== "state" && w !== "people"; });
-    };
-    var a = norm(claimed), b = norm(actual);
-    if (!a.length || !b.length) { return false; }
-    for (var i = 0; i < a.length; i++) {
-      for (var j = 0; j < b.length; j++) { if (a[i] === b[j]) { return false; } }
-    }
-    return true;
+  // Name comparison is ported from the command-line tool rather than
+  // reimplemented, so the browser and the terminal reach the same verdict.
+  // "mismatch" is a finding: a source was retrieved and it names a different
+  // case. It is reached only when both names identify a specific party and
+  // they share none of them, exact or misspelled.
+  function nameVerdict(claimed, actual) {
+    var N = window.VERASCITE_NAMES;
+    if (!N || !claimed || !actual) { return "unclear"; }
+    return N.compare(claimed, actual);
+  }
+
+  // The year the document asserts, taken only from a parenthetical directly
+  // after the citation, so a stray four-digit number cannot become a finding.
+  function claimedYear(text, endIndex) {
+    var after = text.slice(endIndex, endIndex + 40);
+    var m = after.match(/^[^()]{0,24}\((?:[^)]*?\b)?((?:19|20)\d{2})\)/);
+    return m ? m[1] : "";
   }
 
   function panel() {
@@ -243,7 +278,7 @@
       status.textContent = "Checking " + (i + 1) + " of " + items.length + "…";
 
       var settle = function (res) {
-        var merged = Object.assign({}, item, res);
+        var merged = Object.assign({}, item, classify(item, res));
         done.push(merged);
         list.appendChild(row(merged));
         mark(merged.cite, merged.state);

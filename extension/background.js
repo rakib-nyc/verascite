@@ -20,6 +20,7 @@ async function lookup(cite) {
     actual: hit.caseName || "(unnamed)",
     parallel: (hit.citation || [])
       .filter((c) => c.toLowerCase() !== cite.toLowerCase()).slice(0, 3),
+    dateFiled: hit.dateFiled || "",
     url: hit.absolute_url ? "https://www.courtlistener.com" + hit.absolute_url : ""
   };
 }

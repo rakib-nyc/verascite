@@ -17,7 +17,7 @@ async function inject(tab) {
   await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["content.css"] });
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    files: ["reporters.js", "content.js"]
+    files: ["reporters.js", "names.js", "content.js"]
   });
 }
 

@@ -102,6 +102,13 @@ button.ghost:hover:not(:disabled){background:var(--wash)}
 .row.noreporter{background:var(--flag-bg);border-color:var(--flag-edge)}
 .row.noreporter .compare{border-top-color:var(--flag-edge)}
 .sc.noreporter .n{color:var(--flag)}
+.chip.mismatch{background:var(--flag-bg);color:var(--flag);border:1px solid var(--flag-edge)}
+.row.mismatch{background:var(--flag-bg);border-color:var(--flag-edge)}
+.row.mismatch .compare{border-top-color:var(--flag-edge)}
+.sc.mismatch .n{color:var(--flag)}
+.chip.yearoff{background:#FFF6E9;color:#8A5A12;border:1px solid #EBD6B4}
+.row.yearoff{background:#FFFBF4;border-color:#EBD6B4}
+.sc.yearoff .n{color:#8A5A12}
 .reported{font-size:.95rem}
 .reported .who{font-weight:600;color:var(--ink)}
 .compare{font-size:.9rem;color:var(--muted);border-top:1px solid var(--rule-soft);padding-top:9px}
@@ -203,6 +210,7 @@ footer a{color:var(--muted)}
 </div>
 
 <script src="./reporters.js"></script>
+<script src="./names.js"></script>
 <script>
 (function () {
   "use strict";
@@ -246,6 +254,33 @@ footer a{color:var(--muted)}
     return false;
   }
 
+  var LABEL = {
+    mismatch: "Different case at this citation",
+    noreporter: "No such reporter series",
+    yearoff: "Year does not match",
+    found: "Reported",
+    absent: "Not in this archive",
+    vendor: "No free source carries this",
+    declined: "Not looked up"
+  };
+
+  var EXPLAIN = {
+    mismatch: function (i) {
+      return "The text cites this as <b>" + esc(i.claimed) + "</b>, but the archive " +
+        "reports the case at this citation as <b>" + esc(i.actual) + "</b>. Those are " +
+        "different cases. <b>A source was retrieved and it contradicts the text</b> — " +
+        "this is a finding, not a prompt to look." +
+        (i.yearOff ? " The year is wrong too: the text says " + esc(i.claimedYear) +
+          ", the record was filed " + esc(i.filedYear) + "." : "");
+    },
+    yearoff: function (i) {
+      return "Reported as <b>" + esc(i.actual) + "</b>, which matches the name given — " +
+        "but the text says <b>" + esc(i.claimedYear) + "</b> and the record was filed in " +
+        "<b>" + esc(i.filedYear) + "</b>. Check the year, and check you have the right " +
+        "decision: some cases have a later history at a different citation.";
+    }
+  };
+
   var form = document.getElementById("form");
   var input = document.getElementById("input");
   var status = document.getElementById("status");
@@ -285,6 +320,7 @@ footer a{color:var(--muted)}
         cite: cite,
         reporter: reporter,
         claimed: nameMatch ? nameMatch[1].trim() : "",
+        claimedYear: claimedYear(text, m.index + m[0].length),
         vendorOnly: VENDOR_ONLY.test(reporter),
         noSuchReporter: !VENDOR_ONLY.test(reporter) && !reporterExists(reporter)
       });
@@ -300,41 +336,54 @@ footer a{color:var(--muted)}
     return e;
   }
 
-  // Loose comparison, only ever used to *prompt* a human to look. It never
-  // decides anything: a difference is shown as "compare these", not as a finding.
-  function looksDifferent(claimed, actual) {
-    if (!claimed || !actual) { return false; }
-    var norm = function (s) {
-      return s.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/)
-        .filter(function (w) { return w.length > 3 && w !== "state" && w !== "people"; });
-    };
-    var a = norm(claimed), b = norm(actual);
-    if (!a.length || !b.length) { return false; }
-    for (var i = 0; i < a.length; i++) {
-      for (var j = 0; j < b.length; j++) {
-        if (a[i] === b[j]) { return false; }
-      }
-    }
-    return true;
+  // Name comparison is ported from the command-line tool rather than
+  // reimplemented, so the browser and the terminal reach the same verdict.
+  // "mismatch" is a finding: a source was retrieved and it names a different
+  // case. It is reached only when both names identify a specific party and
+  // they share none of them, exact or misspelled.
+  function nameVerdict(claimed, actual) {
+    var N = window.VERASCITE_NAMES;
+    if (!N || !claimed || !actual) { return "unclear"; }
+    return N.compare(claimed, actual);
+  }
+
+  // The year the document asserts, taken only from a parenthetical directly
+  // after the citation, so a stray four-digit number cannot become a finding.
+  function claimedYear(text, endIndex) {
+    var after = text.slice(endIndex, endIndex + 40);
+    var m = after.match(/^[^()]{0,24}\((?:[^)]*?\b)?((?:19|20)\d{2})\)/);
+    return m ? m[1] : "";
   }
 
   function render(item) {
     var row = el("div", "row" +
       (item.state === "absent" ? " absent"
         : item.state === "vendor" ? " vendor"
-        : item.state === "noreporter" ? " noreporter" : ""));
+        : item.state === "noreporter" ? " noreporter"
+        : item.state === "mismatch" ? " mismatch"
+        : item.state === "yearoff" ? " yearoff" : ""));
     var top = el("div", "row-top");
     top.appendChild(el("span", "cite", item.cite));
 
     var chip = el("span", "chip " + item.state);
-    chip.textContent = item.state === "found" ? "Reported"
-      : item.state === "absent" ? "Not in this archive"
-      : item.state === "vendor" ? "No free source carries this"
-      : item.state === "noreporter" ? "No such reporter series" : "Not looked up";
+    chip.textContent = LABEL[item.state] || "Not looked up";
     top.appendChild(chip);
     row.appendChild(top);
 
-    if (item.state === "noreporter") {
+    if (item.state === "mismatch" || item.state === "yearoff") {
+      var mm = el("p", "compare");
+      mm.innerHTML = EXPLAIN[item.state](item);
+      mm.style.borderTop = "none"; mm.style.paddingTop = "0";
+      row.appendChild(mm);
+      if (item.parallel && item.parallel.length) {
+        row.appendChild(el("p", "parallel", "Also printed at: " + item.parallel.join("  ·  ")));
+      }
+      if (item.url) {
+        var ma = el("a", "open", "Read what is actually there →");
+        ma.href = item.url; ma.target = "_blank"; ma.rel = "noopener noreferrer";
+        row.appendChild(ma);
+      }
+    } else if (item.state === "noreporter") {
       var nr = el("p", "compare");
       nr.innerHTML = "<b>" + esc(item.reporter) + "</b> is not among the 1,342 reporter " +
         "series recognised in American law, or any of their known variant spellings. " +
@@ -363,17 +412,12 @@ footer a{color:var(--muted)}
         row.appendChild(el("p", "parallel", "Also printed at: " + item.parallel.join("  ·  ")));
       }
       if (item.claimed) {
+        // Reaching here means the name agreed. A disagreement was classified as
+        // a finding upstream and never arrives in this branch.
         var cmp = el("p", "compare");
-        if (looksDifferent(item.claimed, item.actual)) {
-          cmp.innerHTML = "Your text calls this <b>" + esc(item.claimed) + "</b>. " +
-            "The archive reports a different name. <b>Compare them yourself</b> — a citation " +
-            "attached to the wrong case is the commonest defect there is, and this comparison " +
-            "is a prompt to look, not a finding.";
-        } else {
-          cmp.innerHTML = "Your text calls this <b>" + esc(item.claimed) + "</b>, which is " +
-            "consistent with the archive. That confirms the name only — not the quotation, " +
-            "the page, or what the case holds.";
-        }
+        cmp.innerHTML = "Your text calls this <b>" + esc(item.claimed) + "</b>, which is " +
+          "consistent with the archive. That confirms the name only — not the quotation, " +
+          "the page, or what the case holds.";
         row.appendChild(cmp);
       }
       if (item.url) {
@@ -396,6 +440,23 @@ footer a{color:var(--muted)}
     return row;
   }
 
+      // A retrieved record that names a different case is a contradiction, not a
+      // hint. This is the second-largest defect class and it is the whole reason
+      // the page reports the real case name rather than a bare found/not-found.
+      function classify(item, res) {
+        if (res.state !== "found") { return res; }
+        var merged = Object.assign({}, res);
+        var verdict = nameVerdict(item.claimed, res.actual);
+        var filedYear = (res.dateFiled || "").slice(0, 4);
+        var yearOff = !!(item.claimedYear && filedYear && item.claimedYear !== filedYear);
+        merged.filedYear = filedYear;
+        merged.claimedYear = item.claimedYear || "";
+        merged.yearOff = yearOff;
+        if (verdict === "mismatch") { merged.state = "mismatch"; }
+        else if (yearOff) { merged.state = "yearoff"; }
+        return merged;
+      }
+
   function esc(s) {
     var d = document.createElement("div");
     d.textContent = s;
@@ -406,7 +467,9 @@ footer a{color:var(--muted)}
     var counts = { found: 0, absent: 0, declined: 0 };
     items.forEach(function (i) { counts[i.state] = (counts[i.state] || 0) + 1; });
     var grid = el("div", "summary");
-    [["noreporter", "No such reporter series"],
+    [["mismatch", "Different case at this citation"],
+     ["noreporter", "No such reporter series"],
+     ["yearoff", "Year does not match"],
      ["found", "Reported in the archive"],
      ["absent", "Not in this archive"],
      ["vendor", "No free source carries these"],
@@ -436,6 +499,7 @@ footer a{color:var(--muted)}
           parallel: (hit.citation || []).filter(function (c) {
             return c.toLowerCase() !== cite.toLowerCase();
           }).slice(0, 3),
+          dateFiled: hit.dateFiled || "",
           url: hit.absolute_url
             ? "https://www.courtlistener.com" + hit.absolute_url : ""
         };
@@ -494,7 +558,7 @@ footer a{color:var(--muted)}
             "). That is a network problem, not a finding about this citation." };
         })
         .then(function (res) {
-          var merged = Object.assign({ cite: item.cite, claimed: item.claimed }, res);
+          var merged = Object.assign({}, item, classify(item, res));
           done.push(merged);
           list.appendChild(render(merged));
           i += 1;
