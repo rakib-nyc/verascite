@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check a citation — VeraScite</title>
+<meta name="description" content="Paste legal citations and see which case is actually reported at each one. Free, no signup, nothing installed. Absence is never reported as fabrication.">
+<meta name="keywords" content="check legal citation, verify case citation free, AI hallucination legal citation, citation checker no signup, CourtListener citation lookup, fake case citation check">
+<link rel="canonical" href="https://rakib-nyc.github.io/verascite/check.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23003153'/><text x='16' y='23' font-family='monospace' font-size='19' font-weight='700' fill='%23fff' text-anchor='middle'>*</text></svg>">
+<style>
+:root{
+  --ink:#0A1B2A; --prussian:#003153; --azure:#1668B0; --azure-lift:#E8F0F7;
+  --page:#FFFFFF; --wash:#F3F7FA; --rule:#D5E0E9; --rule-soft:#E7EEF4;
+  --text:#12222F; --muted:#51687A; --faint:#8296A5;
+  /* Absence is neutral. It is not a warning and must not look like one. */
+  --absent:#5A6B79; --absent-bg:#EDF1F4; --absent-edge:#D3DCE3;
+  --flag:#A8271F; --flag-bg:#FBECEA; --flag-edge:#E8CFCA;
+  --ok:#1D5B41; --ok-bg:#E8F1ED; --ok-edge:#C9DCD4;
+  --w:940px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--page);color:var(--text);
+  font-family:'Public Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:-.03em;line-height:1.08;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.9rem,4.2vw,2.7rem)}
+h2{font-size:1.3rem}
+h3{font-size:1rem;font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--azure)}
+code,.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}
+:focus-visible{outline:2px solid var(--azure);outline-offset:3px}
+
+.wrap{max-width:var(--w);margin:0 auto;padding:0 clamp(20px,4vw,32px)}
+header{border-bottom:1px solid var(--rule);background:var(--page)}
+nav{max-width:var(--w);margin:0 auto;padding:0 clamp(20px,4vw,32px);height:58px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:baseline;gap:9px;font-family:'Archivo',sans-serif;font-weight:700;
+  font-size:1.05rem;color:var(--ink);letter-spacing:-.028em;text-decoration:none}
+.brand i{font-family:'IBM Plex Mono',monospace;font-style:normal;color:var(--azure);font-size:1.15rem}
+nav .right{margin-left:auto;display:flex;gap:18px;align-items:center;font-size:.9rem}
+nav .right a{color:var(--muted);text-decoration:none}
+nav .right a:hover{color:var(--prussian)}
+
+.intro{padding:clamp(30px,5vw,46px) 0 clamp(22px,3vw,30px)}
+.kicker{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.lede{color:var(--muted);max-width:62ch;margin-top:16px}
+.lede b{color:var(--text);font-weight:600}
+
+form{display:flex;flex-direction:column;gap:12px;margin:clamp(22px,3vw,30px) 0}
+label{font-weight:600;font-size:.95rem}
+.hint{font-size:.87rem;color:var(--faint)}
+textarea{width:100%;min-height:150px;resize:vertical;padding:14px 15px;border:1px solid var(--rule);
+  border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:.88rem;line-height:1.65;
+  color:var(--text);background:var(--page)}
+textarea:focus{border-color:var(--azure)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font-family:inherit;font-weight:600;font-size:.93rem;padding:11px 20px;border-radius:4px;cursor:pointer;
+  border:1px solid var(--prussian);background:var(--prussian);color:#fff;transition:background .15s}
+button:hover:not(:disabled){background:#00243E}
+button:disabled{opacity:.55;cursor:default}
+button.ghost{background:#fff;color:var(--prussian);border-color:var(--rule)}
+button.ghost:hover:not(:disabled){background:var(--wash)}
+.status{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--muted)}
+
+.privacy{border:1px solid var(--rule);border-left:3px solid var(--azure);background:var(--azure-lift);
+  padding:14px 16px;border-radius:0 4px 4px 0;font-size:.9rem;color:#3D556A}
+.privacy b{color:var(--ink)}
+
+/* ---- results ---- */
+#results{margin:clamp(24px,3vw,34px) 0}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  border-top:1px solid var(--rule);border-left:1px solid var(--rule);margin-bottom:24px}
+.sc{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:14px 16px;background:#fff}
+.sc .n{font-family:'Archivo',sans-serif;font-weight:700;font-size:1.7rem;line-height:1;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+.sc .k{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin-top:8px}
+.sc.found .n{color:var(--ok)} .sc.absent .n{color:var(--absent)} .sc.declined .n{color:var(--muted)}
+
+.row{border:1px solid var(--rule);border-radius:5px;padding:16px 18px;margin-bottom:11px;background:#fff;
+  display:flex;flex-direction:column;gap:10px}
+.row.absent{background:var(--absent-bg);border-color:var(--absent-edge)}
+.row-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.cite{font-family:'IBM Plex Mono',monospace;font-size:.92rem;font-weight:500;color:var(--ink);word-break:break-word}
+.chip{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:3px;white-space:nowrap}
+.chip.found{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-edge)}
+.chip.absent{background:#fff;color:var(--absent);border:1px solid var(--absent-edge)}
+.chip.declined{background:var(--wash);color:var(--muted);border:1px solid var(--rule)}
+.chip.vendor{background:#fff;color:var(--absent);border:1px solid var(--absent-edge)}
+.row.vendor{background:var(--absent-bg);border-color:var(--absent-edge)}
+.row.vendor .compare{border-top-color:var(--absent-edge)}
+.sc.vendor .n{color:var(--absent)}
+.chip.noreporter{background:var(--flag-bg);color:var(--flag);border:1px solid var(--flag-edge)}
+.row.noreporter{background:var(--flag-bg);border-color:var(--flag-edge)}
+.row.noreporter .compare{border-top-color:var(--flag-edge)}
+.sc.noreporter .n{color:var(--flag)}
+.reported{font-size:.95rem}
+.reported .who{font-weight:600;color:var(--ink)}
+.compare{font-size:.9rem;color:var(--muted);border-top:1px solid var(--rule-soft);padding-top:9px}
+.compare b{color:var(--ink)}
+.row.absent .compare{border-top-color:var(--absent-edge)}
+.parallel{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--faint)}
+.row a.open{font-size:.88rem}
+
+/* ---- limits ---- */
+.limits{border:1px solid var(--rule);background:var(--wash);border-radius:5px;padding:20px 22px;
+  margin:clamp(26px,4vw,38px) 0;display:flex;flex-direction:column;gap:10px}
+.limits ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px}
+.limits li{font-size:.93rem;color:var(--muted)}
+.limits li b{color:var(--text)}
+footer{border-top:1px solid var(--rule);padding:26px 0 44px;color:var(--faint);font-size:.86rem}
+footer a{color:var(--muted)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a class="brand" href="./"><i>*</i> VeraScite</a>
+    <span class="right">
+      <a href="./">Overview</a>
+      <a href="https://github.com/rakib-nyc/verascite/blob/main/docs/WORKFLOW.md">Guide</a>
+      <a href="https://github.com/rakib-nyc/verascite">GitHub</a>
+    </span>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <section class="intro">
+    <div class="kicker">Free &nbsp;/&nbsp; nothing installed &nbsp;/&nbsp; no sign-up</div>
+    <h1>See which case is actually reported at each citation.</h1>
+    <p class="lede">
+      Paste citations from a research memo, a brief, or an AI chat. This looks each one up in a
+      free public archive and shows you <b>the case that is really printed there</b> — so you can
+      compare it against the name you were given.
+    </p>
+    <p class="lede" style="margin-top:12px">
+      That comparison is the point. Only about a tenth of bad citations are invented cases. The
+      commonest failure is a <b>real citation attached to the wrong case name</b>, and it survives
+      every check you can do by eye.
+    </p>
+  </section>
+
+  <form id="form">
+    <label for="input">Citations, or text containing them</label>
+    <span class="hint">One per line, or paste a paragraph. Reporter citations like
+      <code>550 U.S. 544</code> or <code>535 F.3d 225</code> are what this can find.</span>
+    <textarea id="input" spellcheck="false" aria-describedby="privacy"></textarea>
+    <div class="actions">
+      <button type="submit" id="go">Look up citations</button>
+      <button type="button" class="ghost" id="sample">Load an example</button>
+      <span class="status" id="status" role="status" aria-live="polite"></span>
+    </div>
+    <p class="privacy" id="privacy">
+      <b>What leaves your browser:</b> only the citation strings themselves — never the
+      surrounding text, never your question, never your draft. Lookups go directly from your
+      browser to the CourtListener public API. There is no server in between and nothing is
+      stored.
+    </p>
+  </form>
+
+  <div id="results"></div>
+
+  <section class="limits">
+    <h2>What this page cannot tell you</h2>
+    <ul>
+      <li><b>Whether a citation is fake.</b> It never says that, and neither should anything
+        else. A great many real cases are absent from free archives — recent decisions,
+        unpublished dispositions, state trial courts, and anything carried only by a paid
+        service. <b>Roughly one citation in ten</b> in a real brief is missing from these
+        sources and is perfectly sound.</li>
+      <li><b>Whether the case says what you were told it says.</b> This checks the address, not
+        the contents. A real case cited for a proposition it does not contain is the single
+        largest category of citation defect and it is invisible here.</li>
+      <li><b>Whether the quotation is real</b>, or whether the page number is right.</li>
+      <li><b>Whether the case is still good law.</b> Nothing free can tell you that.</li>
+      <li>United States authority only. This is not legal advice and it certifies nothing.</li>
+    </ul>
+    <p style="font-size:.93rem;color:var(--muted)">
+      For quotations, page numbers, and whether an authority supports the proposition it is
+      cited for, run <a href="https://github.com/rakib-nyc/verascite">the full tool</a> on the
+      document. It is free and open source, and it runs on your own machine.
+    </p>
+  </section>
+
+  <footer>
+    Citation data from the <a href="https://www.courtlistener.com/">CourtListener</a> API,
+    a free service of the non-profit <a href="https://free.law/">Free Law Project</a>.
+    Please use it gently. &nbsp;·&nbsp;
+    VeraScite is experimental research software under Apache 2.0, provided without warranty.
+  </footer>
+
+</div>
+
+<script src="./reporters.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var API = "https://www.courtlistener.com/api/rest/v4/search/";
+  // CourtListener is a non-profit serving this free. Space requests out and cap
+  // how many one paste can fire, rather than letting a long document hammer it.
+  var GAP_MS = 900;
+  var MAX = 25;
+
+  // Volume, reporter, page. Deliberately simpler than the extractor in the full
+  // tool -- it takes the common reporter form and declines the rest rather than
+  // guessing, because a wrong parse sends the lookup after the wrong case.
+  // Page numbers run long in vendor identifiers -- "2019 WL 1396975" is seven
+  // digits -- so a five-digit cap silently dropped exactly the citations most
+  // likely to need explaining.
+  var CITE = /\b(\d{1,4})\s+([A-Z][A-Za-z.'’]*(?:\s*[0-9]?[A-Za-z.'’]+){0,4}?)\s+(\d{1,7})(?=\b)/g;
+  // Tokens that mean the match is a date, a statute, or a docket rather than a
+  // reporter citation.
+  var NOT_A_REPORTER = /^(?:U\.?S\.?C|C\.?F\.?R|Stat|Pub|No|Fed\.?\s*R|Cir|Supp\.?\s*$)/i;
+  // Vendor database identifiers. These name real decisions that no free archive
+  // carries, so a lookup would report absence for a reason that has nothing to
+  // do with the citation. Saying that plainly is more honest than a null result.
+  var VENDOR_ONLY = /^(?:WL|LEXIS|U\.?S\.?\s*App\.?\s*LEXIS|U\.?S\.?\s*Dist\.?\s*LEXIS)$/i;
+
+  // A reporter series that has never existed is the one thing this page can
+  // state affirmatively, because it is contradicted by a source rather than
+  // merely absent from one. Everything else routes to "not in this archive".
+  function reporterExists(reporter) {
+    var set = window.VERASCITE_REPORTERS;
+    if (!set) { return true; }              // data missing: never accuse
+    if (set.has(reporter)) { return true; }
+    var squashed = reporter.replace(/\s+/g, "");
+    var loose = reporter.replace(/\./g, "").replace(/\s+/g, " ").trim();
+    var it = set.values(), n;
+    while (!(n = it.next()).done) {
+      var v = n.value;
+      if (v.replace(/\s+/g, "") === squashed) { return true; }
+      if (v.replace(/\./g, "").replace(/\s+/g, " ").trim() === loose) { return true; }
+    }
+    return false;
+  }
+
+  var form = document.getElementById("form");
+  var input = document.getElementById("input");
+  var status = document.getElementById("status");
+  var results = document.getElementById("results");
+  var go = document.getElementById("go");
+
+  document.getElementById("sample").addEventListener("click", function () {
+    // One of each result the page can produce, so the example teaches the
+    // distinctions rather than just demonstrating a lookup.
+    input.value =
+      "Bell Atlantic Corp. v. Twombly, 550 U.S. 544 (2007)\n" +
+      "Doe v. Roe, 475 F.6th 972 (8th Cir. 1983)\n" +
+      "Iko v. Shreve, 122 F.3d 707 (4th Cir. 1997)\n" +
+      "Tinch v. Video Indus. Servs., Inc., 2019 WL 1396975 (E.D. Mich. 2019)";
+    results.innerHTML = "";
+    status.textContent = "";
+  });
+
+  function extract(text) {
+    var out = [], seen = {}, m;
+    CITE.lastIndex = 0;
+    while ((m = CITE.exec(text)) !== null) {
+      var reporter = m[2].replace(/\s+/g, " ").trim();
+      if (NOT_A_REPORTER.test(reporter)) { continue; }
+      if (!/[A-Za-z]/.test(reporter)) { continue; }
+      var cite = m[1] + " " + reporter + " " + m[3];
+      var key = cite.toLowerCase();
+      if (seen[key]) { continue; }
+      seen[key] = 1;
+      // The words immediately before a citation are usually its case name.
+      var before = text.slice(Math.max(0, m.index - 90), m.index);
+      // Party names are full of periods and commas -- "Bell Atlantic Corp. v.
+      // Twombly", "Video Indus. Servs., Inc." -- so the name is taken as the
+      // run ending in " v. Something" immediately before the citation.
+      var nameMatch = before.match(/([A-Z][A-Za-z0-9'’&.,\- ]{1,70}?\sv\.?\s[A-Za-z0-9'’&.,\- ]{2,60}?)[,\s]*$/);
+      out.push({
+        cite: cite,
+        reporter: reporter,
+        claimed: nameMatch ? nameMatch[1].trim() : "",
+        vendorOnly: VENDOR_ONLY.test(reporter),
+        noSuchReporter: !VENDOR_ONLY.test(reporter) && !reporterExists(reporter)
+      });
+      if (out.length >= MAX) { break; }
+    }
+    return out;
+  }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) { e.className = cls; }
+    if (text !== undefined) { e.textContent = text; }
+    return e;
+  }
+
+  // Loose comparison, only ever used to *prompt* a human to look. It never
+  // decides anything: a difference is shown as "compare these", not as a finding.
+  function looksDifferent(claimed, actual) {
+    if (!claimed || !actual) { return false; }
+    var norm = function (s) {
+      return s.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/)
+        .filter(function (w) { return w.length > 3 && w !== "state" && w !== "people"; });
+    };
+    var a = norm(claimed), b = norm(actual);
+    if (!a.length || !b.length) { return false; }
+    for (var i = 0; i < a.length; i++) {
+      for (var j = 0; j < b.length; j++) {
+        if (a[i] === b[j]) { return false; }
+      }
+    }
+    return true;
+  }
+
+  function render(item) {
+    var row = el("div", "row" +
+      (item.state === "absent" ? " absent"
+        : item.state === "vendor" ? " vendor"
+        : item.state === "noreporter" ? " noreporter" : ""));
+    var top = el("div", "row-top");
+    top.appendChild(el("span", "cite", item.cite));
+
+    var chip = el("span", "chip " + item.state);
+    chip.textContent = item.state === "found" ? "Reported"
+      : item.state === "absent" ? "Not in this archive"
+      : item.state === "vendor" ? "No free source carries this"
+      : item.state === "noreporter" ? "No such reporter series" : "Not looked up";
+    top.appendChild(chip);
+    row.appendChild(top);
+
+    if (item.state === "noreporter") {
+      var nr = el("p", "compare");
+      nr.innerHTML = "<b>" + esc(item.reporter) + "</b> is not among the 1,342 reporter " +
+        "series recognised in American law, or any of their known variant spellings. " +
+        "Every published American case appears in one of them. <b>This is the one thing " +
+        "this page can tell you affirmatively</b> — it is not an absence, it is a " +
+        "contradiction. A citation to a reporter that does not exist should not be filed.";
+      nr.style.borderTop = "none"; nr.style.paddingTop = "0";
+      row.appendChild(nr);
+    } else if (item.state === "vendor") {
+      var v = el("p", "compare");
+      v.innerHTML = "This is a <b>vendor database identifier</b>. It names a real decision, " +
+        "but no free archive carries these — so nothing here, and no free tool anywhere, can " +
+        "confirm or deny it. <b>That is a gap in public access, not a mark against your " +
+        "citation.</b> Look it up in the service that issued it, or find the case's " +
+        "official reporter citation instead.";
+      v.style.borderTop = "none"; v.style.paddingTop = "0";
+      row.appendChild(v);
+    } else if (item.state === "found") {
+      var rep = el("p", "reported");
+      rep.appendChild(document.createTextNode("This citation is reported as "));
+      rep.appendChild(el("span", "who", item.actual));
+      rep.appendChild(document.createTextNode("."));
+      row.appendChild(rep);
+
+      if (item.parallel && item.parallel.length) {
+        row.appendChild(el("p", "parallel", "Also printed at: " + item.parallel.join("  ·  ")));
+      }
+      if (item.claimed) {
+        var cmp = el("p", "compare");
+        if (looksDifferent(item.claimed, item.actual)) {
+          cmp.innerHTML = "Your text calls this <b>" + esc(item.claimed) + "</b>. " +
+            "The archive reports a different name. <b>Compare them yourself</b> — a citation " +
+            "attached to the wrong case is the commonest defect there is, and this comparison " +
+            "is a prompt to look, not a finding.";
+        } else {
+          cmp.innerHTML = "Your text calls this <b>" + esc(item.claimed) + "</b>, which is " +
+            "consistent with the archive. That confirms the name only — not the quotation, " +
+            "the page, or what the case holds.";
+        }
+        row.appendChild(cmp);
+      }
+      if (item.url) {
+        var a = el("a", "open", "Read the case on CourtListener →");
+        a.href = item.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+        row.appendChild(a);
+      }
+    } else if (item.state === "absent") {
+      var note = el("p", "compare");
+      note.innerHTML = "<b>This does not mean the citation is fake.</b> It means this archive " +
+        "does not contain it. Recent decisions, unpublished dispositions, state trial court " +
+        "orders, and cases carried only by paid services are routinely absent — about one " +
+        "citation in ten. Look it up somewhere else before relying on it, and before removing it.";
+      note.style.borderTop = "none";
+      note.style.paddingTop = "0";
+      row.appendChild(note);
+    } else {
+      row.appendChild(el("p", "compare", item.reason || "This did not look like a reporter citation."));
+    }
+    return row;
+  }
+
+  function esc(s) {
+    var d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function summarise(items) {
+    var counts = { found: 0, absent: 0, declined: 0 };
+    items.forEach(function (i) { counts[i.state] = (counts[i.state] || 0) + 1; });
+    var grid = el("div", "summary");
+    [["noreporter", "No such reporter series"],
+     ["found", "Reported in the archive"],
+     ["absent", "Not in this archive"],
+     ["vendor", "No free source carries these"],
+     ["declined", "Not looked up"]].forEach(function (pair) {
+      if (!counts[pair[0]]) { return; }
+      var c = el("div", "sc " + pair[0]);
+      c.appendChild(el("div", "n", String(counts[pair[0]])));
+      c.appendChild(el("div", "k", pair[1]));
+      grid.appendChild(c);
+    });
+    return grid;
+  }
+
+  function lookup(cite) {
+    var url = API + "?type=o&q=" + encodeURIComponent('citation:("' + cite + '")');
+    return fetch(url, { headers: { "Accept": "application/json" } })
+      .then(function (r) {
+        if (!r.ok) { throw new Error("HTTP " + r.status); }
+        return r.json();
+      })
+      .then(function (d) {
+        var hit = (d.results || [])[0];
+        if (!d.count || !hit) { return { state: "absent" }; }
+        return {
+          state: "found",
+          actual: hit.caseName || "(unnamed)",
+          parallel: (hit.citation || []).filter(function (c) {
+            return c.toLowerCase() !== cite.toLowerCase();
+          }).slice(0, 3),
+          url: hit.absolute_url
+            ? "https://www.courtlistener.com" + hit.absolute_url : ""
+        };
+      });
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var found = extract(input.value);
+    results.innerHTML = "";
+    if (!found.length) {
+      status.textContent = "";
+      results.appendChild(render({
+        cite: "—", state: "declined",
+        reason: "No reporter citations were recognised. This page reads the common " +
+                "form — volume, reporter, page — such as 550 U.S. 544."
+      }));
+      return;
+    }
+
+    go.disabled = true;
+    var done = [];
+    var list = el("div");
+    var summary = el("div");
+    results.appendChild(summary);
+    results.appendChild(list);
+
+    // Serial, with a gap. A free non-profit service should not be hammered
+    // because somebody pasted a long brief.
+    var i = 0;
+    (function step() {
+      if (i >= found.length) {
+        go.disabled = false;
+        status.textContent = "Checked " + done.length + " citation" +
+          (done.length === 1 ? "" : "s") + ".";
+        summary.replaceWith(summarise(done));
+        return;
+      }
+      var item = found[i];
+      if (item.noSuchReporter) {
+        // No request: reporters-db already settled it, locally.
+        var nr2 = Object.assign({}, item, { state: "noreporter" });
+        done.push(nr2); list.appendChild(render(nr2));
+        i += 1; step(); return;
+      }
+      if (item.vendorOnly) {
+        // No request: the archive structurally cannot hold this.
+        var v = Object.assign({}, item, { state: "vendor" });
+        done.push(v); list.appendChild(render(v));
+        i += 1; step(); return;
+      }
+      status.textContent = "Looking up " + (i + 1) + " of " + found.length + "…";
+      lookup(item.cite)
+        .catch(function (err) {
+          return { state: "declined", reason: "Could not reach the archive (" + err.message +
+            "). That is a network problem, not a finding about this citation." };
+        })
+        .then(function (res) {
+          var merged = Object.assign({ cite: item.cite, claimed: item.claimed }, res);
+          done.push(merged);
+          list.appendChild(render(merged));
+          i += 1;
+          setTimeout(step, GAP_MS);
+        });
+    })();
+  });
+})();
+</script>
+</body>
+</html>
