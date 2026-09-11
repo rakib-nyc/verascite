@@ -8,9 +8,20 @@
  */
 const API = "https://www.courtlistener.com/api/rest/v4/search/";
 
+/* A token is optional and lives in this browser's extension storage. It is
+ * attached here, so it travels only to CourtListener and never through a page. */
+async function authHeaders() {
+  const headers = { Accept: "application/json" };
+  try {
+    const { courtlistenerToken } = await chrome.storage.local.get("courtlistenerToken");
+    if (courtlistenerToken) { headers.Authorization = "Token " + courtlistenerToken; }
+  } catch (e) { /* storage unavailable: stay anonymous */ }
+  return headers;
+}
+
 async function lookup(cite) {
   const url = API + "?type=o&q=" + encodeURIComponent('citation:("' + cite + '")');
-  const response = await fetch(url, { headers: { Accept: "application/json" } });
+  const response = await fetch(url, { headers: await authHeaders() });
   if (!response.ok) { throw new Error("HTTP " + response.status); }
   const data = await response.json();
   const hit = (data.results || [])[0];

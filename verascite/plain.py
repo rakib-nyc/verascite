@@ -25,6 +25,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
 
+from . import DISCLAIMER
 from .coverage import measure as measure_coverage
 from .ledger import Ledger
 from .safety import flatten_for_output
@@ -192,6 +193,8 @@ def render_plain(ledger: Ledger, document: Path, generated_at: str = "") -> str:
         "*Produced by VeraScite, free and open-source software. It is experimental, "
         "it comes with no warranty of any kind, and it certifies nothing.*"
     )
+    lines.append("")
+    lines.append(f"*{DISCLAIMER}*")
     lines.append("")
     return "\n".join(lines)
 

@@ -27,6 +27,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Optional
 
+from . import DISCLAIMER
 from .ledger import Ledger
 from .verdicts import Overall
 
@@ -205,6 +206,10 @@ def render_summary(outcomes: list[DocumentOutcome], generated_at: str = "") -> s
         for outcome in failed:
             lines.append(f"- `{outcome.path}` — {outcome.error}")
         lines.append("")
+    lines.append("---")
+    lines.append("")
+    lines.append(f"*{DISCLAIMER}*")
+    lines.append("")
     return "\n".join(lines)
 
 

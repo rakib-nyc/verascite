@@ -36,7 +36,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from . import __version__
+from . import DISCLAIMER, __version__
 from .coverage import measure as measure_coverage
 from .extract import extract
 from .ingest import ingest
@@ -69,7 +69,8 @@ CONTRACT = (
     "routine. Only 'contradicted' means a source was retrieved and disagrees "
     "with the document; quote the attached evidence rather than the label. Never "
     "upgrade a result. This is not legal advice and it certifies nothing; "
-    "responsibility for the filing remains with the person filing it."
+    "responsibility for the filing remains with the person filing it. "
+    + DISCLAIMER
 )
 
 TOOLS = [
@@ -172,6 +173,7 @@ def verify(text: str = "", path: str = "", offline: bool = False) -> dict:
         "coverage": coverage.statement(),
         "citations": [_entry_result(e) for e in ledger.sorted_by_severity()],
         "how_to_report_this": CONTRACT,
+        "disclaimer": DISCLAIMER,
         "tool_version": __version__,
     }
 

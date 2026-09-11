@@ -378,6 +378,14 @@ produced.
 
 ---
 
+## Install
+
+**[Every way to use it, step by step →](docs/INSTALL-ALL.md)** — web page, browser
+extension, Word add-in, command line, MCP server, and how to set your own CourtListener
+token on each (optional; everything works without one).
+
+> **AI can make mistakes. For experimental and research use only.**
+
 ## Getting started
 
 ### Step 1 — Check you have Python 3.10 or newer

@@ -24,6 +24,7 @@ from typing import Optional
 from .ledger import Ledger
 from .safety import flatten_for_output
 from .models import CiteKind, LedgerEntry
+from . import DISCLAIMER
 from .verdicts import SEVERITY_ORDER, CheckResult, Overall, Verdict
 
 DISCLOSURE = """\
@@ -588,6 +589,10 @@ def render_report(ledger: Ledger, generated_at: Optional[str] = None) -> str:
         lines.append("```json")
         import json
         lines.append(json.dumps(thresholds, indent=2))
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+        lines.append(f"*{DISCLAIMER}*")
         lines.append("```")
         lines.append("")
 

@@ -818,6 +818,7 @@ def audit_document(
     quotes: bool = True,
     annotate: bool = True,
     record: bool = True,
+    plain: bool = False,
     quiet: bool = True,
     ask=None,
     max_reads: int = 0,
@@ -831,6 +832,9 @@ def audit_document(
     ``offline=True`` performs local checks only: no citation string leaves the
     machine. Existence is then reported NOT_CHECKABLE rather than guessed --
     absence of a lookup is not evidence about the citation.
+
+    ``plain=True`` also writes the plain-language report intended for someone who
+    is not a lawyer.
 
     ``ask`` supplies the grounded reader: any callable taking a prompt and
     returning the model's reply. Pass one built by ``verascite.readers`` to use
@@ -847,7 +851,7 @@ def audit_document(
     args.no_quotes = not quotes
     args.no_annotate = not annotate
     args.no_record = not record
-    args.plain = False
+    args.plain = plain
     args.no_statutes = False
     args.download_code_titles = False
     args.quiet = quiet

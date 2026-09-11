@@ -126,6 +126,25 @@ button.ghost:hover:not(:disabled){background:var(--wash)}
 footer{border-top:1px solid var(--rule);padding:26px 0 44px;color:var(--faint);font-size:.86rem}
 footer a{color:var(--muted)}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.settings{border:1px solid var(--rule);border-radius:5px;background:var(--wash);margin-top:4px}
+.settings summary{cursor:pointer;padding:11px 14px;font-size:.9rem;font-weight:600;color:var(--prussian);
+  list-style:none;display:flex;align-items:center;gap:9px}
+.settings summary::-webkit-details-marker{display:none}
+.settings summary::before{content:"+";font-family:'IBM Plex Mono',monospace;color:var(--faint)}
+.settings[open] summary::before{content:"−"}
+.settings .opt{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--faint);border:1px solid var(--rule);padding:2px 6px;border-radius:3px}
+.settings-body{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px;
+  border-top:1px solid var(--rule);padding-top:12px;font-size:.9rem;color:var(--muted)}
+.settings-body b{color:var(--text)}
+.settings-body label{font-weight:600;font-size:.85rem;color:var(--text)}
+.settings-body input{padding:9px 11px;border:1px solid var(--rule);border-radius:4px;
+  font-family:'IBM Plex Mono',monospace;font-size:.85rem;background:#fff;color:var(--text)}
+.settings-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.settings-actions button{width:auto;padding:7px 13px;font-size:.85rem}
+.disclaimer{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.04em;
+  color:var(--faint);text-align:center;padding:14px 0 0;border-top:1px solid var(--rule-soft);margin-top:18px}
 </style>
 </head>
 <body>
@@ -176,6 +195,32 @@ footer a{color:var(--muted)}
     </p>
   </form>
 
+
+  <details class="settings">
+    <summary>Use your own CourtListener token <span class="opt">optional</span></summary>
+    <div class="settings-body">
+      <p>Lookups work without one. A token raises your rate limit — anonymous
+        requests are throttled first, and a long document can crawl without one.</p>
+      <p><b>It is stored in this browser only</b>, and sent only to courtlistener.com
+        in your own requests. There is no account and no server of ours; we could not
+        receive it if we wanted to.</p>
+      <label for="tok">Token</label>
+      <input id="tok" type="password" autocomplete="off" spellcheck="false"
+             placeholder="paste your token">
+      <div class="settings-actions">
+        <button type="button" class="ghost" id="tokSave">Save</button>
+        <button type="button" class="ghost" id="tokClear">Remove</button>
+        <span class="status" id="tokStatus"></span>
+      </div>
+      <p class="note">
+        Get one free at
+        <a href="https://www.courtlistener.com/profile/api-token/" target="_blank"
+           rel="noopener noreferrer">courtlistener.com/profile/api-token</a> —
+        sign up, copy the token, paste it here. Revoke it there at any time.
+      </p>
+    </div>
+  </details>
+
   <div id="results"></div>
 
   <section class="limits">
@@ -205,12 +250,14 @@ footer a{color:var(--muted)}
     a free service of the non-profit <a href="https://free.law/">Free Law Project</a>.
     Please use it gently. &nbsp;·&nbsp;
     VeraScite is experimental research software under Apache 2.0, provided without warranty.
+    <p class="disclaimer">AI can make mistakes. For experimental &amp; research use only.</p>
   </footer>
 
 </div>
 
 <script src="./reporters.js"></script>
 <script src="./names.js"></script>
+<script src="./token.js"></script>
 <script>
 (function () {
   "use strict";
@@ -501,7 +548,7 @@ footer a{color:var(--muted)}
 
   function lookup(cite) {
     var url = API + "?type=o&q=" + encodeURIComponent('citation:("' + cite + '")');
-    return fetch(url, { headers: { "Accept": "application/json" } })
+    return fetch(url, { headers: window.VERASCITE_TOKEN.headers() })
       .then(function (r) {
         if (!r.ok) { throw new Error("HTTP " + r.status); }
         return r.json();
@@ -521,6 +568,36 @@ footer a{color:var(--muted)}
         };
       });
   }
+
+
+  // --- token settings -------------------------------------------------------
+  (function () {
+    var T = window.VERASCITE_TOKEN;
+    if (!T) { return; }
+    var box = document.getElementById("tok");
+    var out = document.getElementById("tokStatus");
+    if (!box) { return; }
+    var shown = T.masked();
+    if (shown) { box.placeholder = "saved: " + shown; }
+    document.getElementById("tokSave").addEventListener("click", function () {
+      var value = box.value.trim();
+      if (!value) { out.textContent = "Nothing to save."; return; }
+      out.textContent = "Checking…";
+      T.verify(value).then(function (r) {
+        if (!r.ok) { out.textContent = r.reason; return; }
+        T.write(value);
+        box.value = "";
+        box.placeholder = "saved: " + T.masked();
+        out.textContent = "Saved in this browser.";
+      });
+    });
+    document.getElementById("tokClear").addEventListener("click", function () {
+      T.write("");
+      box.value = "";
+      box.placeholder = "paste your token";
+      out.textContent = "Removed.";
+    });
+  })();
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();

@@ -33,7 +33,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from . import __version__
+from . import DISCLAIMER, __version__
 from .ledger import Ledger
 from .report import DIMENSION_LABELS, MODEL_SOURCE
 from .safety import flatten_for_output
@@ -294,6 +294,8 @@ def render_record(
         "experimental research software provided without warranty. It does not "
         "provide legal advice and it certifies nothing."
     )
+    lines.append("")
+    lines.append(f"**{DISCLAIMER}**")
     lines.append("")
     return "\n".join(lines)
 

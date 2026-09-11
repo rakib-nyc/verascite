@@ -7,6 +7,7 @@
 <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 <script src="../reporters.js"></script>
 <script src="../names.js"></script>
+<script src="../token.js"></script>
 <style>
 /* A task pane is ~320px wide and sits beside the document, so this is a
    working panel rather than a page: dense, scannable, no hero. Colour carries
@@ -74,6 +75,19 @@ button.ghost:disabled{color:var(--faint)}
 .limits{background:var(--wash);border:1px solid var(--rule);border-radius:5px;padding:10px 12px;
   font-size:11.5px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
 .limits b{color:var(--text)}
+details.settings{border:1px solid var(--rule);border-radius:5px;background:var(--wash)}
+details.settings summary{cursor:pointer;padding:9px 11px;font-size:12px;font-weight:600;
+  color:var(--prussian);list-style:none}
+details.settings summary::-webkit-details-marker{display:none}
+.settings-body{padding:0 11px 11px;display:flex;flex-direction:column;gap:8px;font-size:11.5px;
+  color:var(--muted);border-top:1px solid var(--rule);padding-top:10px}
+.settings-body b{color:var(--text)}
+.settings-body input{padding:7px 9px;border:1px solid var(--rule);border-radius:4px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;background:#fff;color:var(--text)}
+.settings-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.settings-actions button{width:auto;padding:6px 10px;font-size:11.5px}
+.disclaimer{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;color:var(--faint);
+  text-align:center;padding-top:10px;border-top:1px solid var(--rule-soft)}
 </style>
 </head>
 <body>
@@ -94,6 +108,23 @@ button.ghost:disabled{color:var(--faint)}
     Findings only — never on a citation that is merely absent from the archive.
   </p>
 
+  <details class="settings">
+    <summary>Use your own CourtListener token (optional)</summary>
+    <div class="settings-body">
+      <p>Lookups work without one. A token raises your rate limit.</p>
+      <p><b>Stored in this task pane only</b>, and sent only to courtlistener.com in your own
+        requests. No account, and no server of ours to receive it.</p>
+      <input id="tok" type="password" autocomplete="off" spellcheck="false" placeholder="paste your token">
+      <div class="settings-actions">
+        <button type="button" class="ghost" id="tokSave">Save</button>
+        <button type="button" class="ghost" id="tokClear">Remove</button>
+      </div>
+      <p class="status" id="tokStatus"></p>
+      <p>Free at <a href="https://www.courtlistener.com/profile/api-token/" target="_blank"
+        rel="noopener noreferrer">courtlistener.com/profile/api-token</a>. Revoke it there anytime.</p>
+    </div>
+  </details>
+
   <div class="divider"></div>
   <div class="rows" id="rows"></div>
 
@@ -105,6 +136,8 @@ button.ghost:disabled{color:var(--faint)}
       good law.</p>
     <p>Not legal advice. Certifies nothing. Responsibility for the filing stays with you.</p>
   </div>
+
+  <p class="disclaimer">AI can make mistakes.<br>For experimental &amp; research use only.</p>
 
 </div>
 
@@ -285,7 +318,7 @@ button.ghost:disabled{color:var(--faint)}
   function lookup(cite) {
     var url = "https://www.courtlistener.com/api/rest/v4/search/?type=o&q=" +
       encodeURIComponent('citation:("' + cite + '")');
-    return fetch(url, { headers: { Accept: "application/json" } })
+    return fetch(url, { headers: window.VERASCITE_TOKEN.headers() })
       .then(function (r) {
         if (!r.ok) { throw new Error("HTTP " + r.status); }
         return r.json();
@@ -423,6 +456,28 @@ button.ghost:disabled{color:var(--faint)}
       checkBtn.disabled = false;
     });
   }
+
+  (function () {
+    var T = window.VERASCITE_TOKEN;
+    var box = document.getElementById("tok");
+    var out = document.getElementById("tokStatus");
+    if (!T || !box) { return; }
+    if (T.masked()) { box.placeholder = "saved: " + T.masked(); }
+    document.getElementById("tokSave").addEventListener("click", function () {
+      var v = box.value.trim();
+      if (!v) { out.textContent = "Nothing to save."; return; }
+      out.textContent = "Checking\u2026";
+      T.verify(v).then(function (r) {
+        if (!r.ok) { out.textContent = r.reason; return; }
+        T.write(v); box.value = ""; box.placeholder = "saved: " + T.masked();
+        out.textContent = "Saved on this machine.";
+      });
+    });
+    document.getElementById("tokClear").addEventListener("click", function () {
+      T.write(""); box.value = ""; box.placeholder = "paste your token";
+      out.textContent = "Removed.";
+    });
+  })();
 
   Office.onReady(function (info) {
     if (info.host !== Office.HostType.Word) {

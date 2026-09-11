@@ -21,6 +21,11 @@ async function inject(tab) {
   });
 }
 
+document.getElementById("opts").addEventListener("click", (e) => {
+  e.preventDefault();
+  chrome.runtime.openOptionsPage();
+});
+
 (async function () {
   try {
     const tab = await activeTab();
